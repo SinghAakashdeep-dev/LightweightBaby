@@ -1,0 +1,2196 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Lightweight Baby</title>
+<script>/* set colours before first paint */try{var p=localStorage.getItem("fs-theme")||"system",d=p==="dark"||(p==="system"&&(window.Android&&Android.isSystemDark?Android.isSystemDark():matchMedia("(prefers-color-scheme: dark)").matches));document.documentElement.setAttribute("data-theme",d?"dark":"light")}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap">
+<style>
+/* Layout: mobile-first single column with a bottom tab bar; wide screens get a top tab row and a two-column Today view. */
+:root{
+  --bg:#EDF1EE; --surface:#FFFFFF; --surface-2:#F4F7F5; --ink:#14201B; --muted:#5A6A63; --line:#D6DFDA;
+  --accent:#1E6B57; --accent-ink:#FFFFFF; --accent-soft:#D7EAE2;
+  --ember:#CF5326; --ember-soft:#FAE2D7; --sky:#2C68C6; --sky-soft:#DBE6F8; --gold:#A87A12; --gold-soft:#F5EACB;
+  --bad:#B83A28;
+  --font-display:'Sora','Segoe UI',system-ui,sans-serif;
+  --font-body:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --font-num:'JetBrains Mono',ui-monospace,'Cascadia Mono',monospace;
+  --radius:14px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0E1412; --surface:#16201C; --surface-2:#1C2823; --ink:#E5EDE9; --muted:#93A39B; --line:#2A3832;
+  --accent:#55B897; --accent-ink:#06120D; --accent-soft:#1B3A30;
+  --ember:#F07B4F; --ember-soft:#3B2219; --sky:#73A5F2; --sky-soft:#1A2A42; --gold:#E0B44E; --gold-soft:#3A2F14;
+  --bad:#F07763; color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#0E1412; --surface:#16201C; --surface-2:#1C2823; --ink:#E5EDE9; --muted:#93A39B; --line:#2A3832;
+  --accent:#55B897; --accent-ink:#06120D; --accent-soft:#1B3A30;
+  --ember:#F07B4F; --ember-soft:#3B2219; --sky:#73A5F2; --sky-soft:#1A2A42; --gold:#E0B44E; --gold-soft:#3A2F14;
+  --bad:#F07763; color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%;padding-top:env(safe-area-inset-top,0px);scroll-padding-top:calc(80px + env(safe-area-inset-top,0px))}
+img{max-width:100%}
+body{margin:0;-webkit-tap-highlight-color:transparent;background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:15px;line-height:1.5}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+h1,h2,h3{font-family:var(--font-display);margin:0;text-wrap:balance;letter-spacing:-.01em}
+h2{font-size:1.05rem;font-weight:600}
+h3{font-size:.95rem;font-weight:600}
+.num{font-family:var(--font-num);font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+.small{font-size:.82rem}
+.label{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600}
+
+.wrap{max-width:1080px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+header.top .wrap{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:12px}
+.brand{display:flex;align-items:center;gap:10px}
+.brand-mark{width:30px;height:30px;border-radius:9px;background:var(--accent);display:grid;place-items:center}
+.brand h1{font-size:1.1rem;font-weight:700}
+.datenav{display:flex;align-items:center;gap:4px}
+.datenav button{width:34px;height:34px}
+.datenav .d{min-width:104px;text-align:center;font-weight:600;font-size:.92rem}
+
+nav.tabs{display:none}
+nav.bottom{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--surface);border-top:1px solid var(--line);
+  padding-bottom:env(safe-area-inset-bottom,0px);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
+nav.bottom .row{display:grid;grid-template-columns:repeat(6,1fr)}
+nav.bottom a,nav.tabs a{color:var(--muted);text-decoration:none;font-weight:600}
+nav.bottom a{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 2px 10px;font-size:.72rem}
+nav.bottom a svg{width:22px;height:22px}
+nav.bottom a[aria-current="page"],nav.tabs a[aria-current="page"]{color:var(--accent)}
+main{padding-block:16px 110px}
+@media (min-width:900px){
+  nav.bottom{display:none}
+  nav.tabs{display:flex;gap:4px}
+  nav.tabs a{padding:8px 14px;border-radius:999px;font-size:.9rem}
+  nav.tabs a[aria-current="page"]{background:var(--accent-soft)}
+  main{padding-block:24px 48px}
+}
+
+.view{display:grid;gap:14px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px;display:grid;gap:12px;min-width:0}
+.card-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.grid2{display:grid;gap:14px}
+@media (min-width:900px){.grid2{grid-template-columns:1.15fr 1fr;align-items:start}.col{display:grid;gap:14px;min-width:0}}
+.col{display:grid;gap:14px;min-width:0}
+
+button,.btn{font:inherit;cursor:pointer;border-radius:10px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);padding:9px 14px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+button:hover{border-color:var(--muted)}
+button:disabled{opacity:.55;cursor:not-allowed}
+button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+button.ghost{background:transparent}
+button.icon{padding:0;width:38px;height:38px}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+input,select,textarea{font:inherit;color:var(--ink);background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:9px 11px;width:100%;min-width:0}
+textarea{resize:vertical;min-height:84px}
+.field{display:grid;gap:5px}
+.field > span{font-size:.8rem;color:var(--muted);font-weight:600}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.row > .grow{flex:1 1 160px}
+.fields{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(140px,1fr))}
+.seg{display:inline-flex;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:3px}
+.seg button{border:0;background:transparent;padding:7px 14px;border-radius:8px;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.12)}
+
+/* Today hero */
+.hero{display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:center}
+@media (max-width:420px){.hero{grid-template-columns:1fr;justify-items:center}}
+.ring{position:relative;width:150px;height:150px}
+.ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring .center{position:absolute;inset:0;display:grid;place-content:center;text-align:center}
+.ring .big{font-family:var(--font-num);font-size:1.7rem;font-weight:600;line-height:1.1}
+.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 14px;width:100%}
+.stat .v{font-family:var(--font-num);font-size:1.15rem;font-weight:600}
+.equation{font-size:.8rem;color:var(--muted)}
+.macro{display:grid;gap:4px}
+.macro .top{display:flex;justify-content:space-between;font-size:.85rem}
+.bar{height:8px;border-radius:99px;background:var(--surface-2);overflow:hidden;border:1px solid var(--line)}
+.bar > i{display:block;height:100%;border-radius:99px}
+.chip{display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:99px;font-size:.75rem;font-weight:600}
+.chip.ember{background:var(--ember-soft);color:var(--ember)}
+.chip.sky{background:var(--sky-soft);color:var(--sky)}
+.chip.accent{background:var(--accent-soft);color:var(--accent)}
+.chip.gold{background:var(--gold-soft);color:var(--gold)}
+
+.list{display:grid}
+.item{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}
+.item:first-child{border-top:0}
+.item .name{font-weight:600;min-width:0;overflow-wrap:anywhere}
+.item .sub{font-size:.8rem;color:var(--muted)}
+.item .k{font-family:var(--font-num);font-weight:600;white-space:nowrap}
+.item button{width:30px;height:30px;padding:0;background:transparent;border-color:transparent;color:var(--muted)}
+.item button:hover{color:var(--bad);border-color:var(--line)}
+.group-title{display:flex;justify-content:space-between;margin-top:6px;padding-top:8px}
+.empty{padding:14px;border:1px dashed var(--line);border-radius:10px;color:var(--muted);font-size:.9rem;text-align:center}
+
+.review{border:1px solid var(--accent);background:var(--accent-soft);border-radius:var(--radius);padding:14px;display:grid;gap:10px}
+.review-row{display:grid;grid-template-columns:minmax(0,1fr) 84px 34px;gap:8px;align-items:center}
+.review-row .macros{grid-column:1 / -1;font-size:.78rem;color:var(--muted);margin-top:-4px}
+.review-row input{background:var(--surface)}
+.photo-preview{max-height:220px;border-radius:10px;object-fit:cover;width:100%}
+.notice{padding:10px 12px;border-radius:10px;background:var(--gold-soft);color:var(--ink);font-size:.86rem}
+.notice.err{background:var(--ember-soft)}
+.thinking{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:.9rem}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--accent);animation:pulse 1s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.25}}
+@media (prefers-reduced-motion:reduce){.dot{animation:none}}
+
+.steps-big{font-family:var(--font-num);font-size:2.2rem;font-weight:600;line-height:1}
+.chart{width:100%;height:auto;display:block}
+.chart text{fill:var(--muted);font-family:var(--font-num);font-size:9px}
+
+.plan-block{display:grid;gap:6px}
+.ex{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:start;padding:10px;border-radius:10px;background:var(--surface-2);border:1px solid var(--line)}
+.ex input{width:20px;height:20px;margin-top:2px;accent-color:var(--accent)}
+.ex.done .ex-name{text-decoration:line-through;color:var(--muted)}
+.ex-name{font-weight:600}
+.ex-meta{font-size:.82rem;color:var(--muted)}
+.mic[aria-pressed="true"]{background:var(--ember);border-color:var(--ember);color:#fff}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;font-weight:600;font-size:.9rem;z-index:20;max-width:calc(100% - 32px)}
+@media (min-width:900px){.toast{bottom:24px}}
+/* Music */
+.np{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center}
+.np-art{width:96px;height:96px;border-radius:12px;object-fit:cover;background:var(--surface-2);border:1px solid var(--line);display:grid;place-items:center;color:var(--muted)}
+.np-title{font-family:var(--font-display);font-weight:600;font-size:1.05rem;line-height:1.25;overflow-wrap:anywhere}
+.np-times{display:flex;justify-content:space-between;font-family:var(--font-num);font-size:.75rem;color:var(--muted)}
+.np-bar{height:10px;cursor:pointer}
+.np-controls{display:flex;justify-content:center;align-items:center;gap:18px}
+.np-controls button{border-radius:50%;width:52px;height:52px;padding:0}
+.np-controls button.big{width:68px;height:68px;background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.np-controls svg{width:24px;height:24px}
+.np-controls button.big svg{width:30px;height:30px}
+.pl-list{display:grid;gap:2px}
+.pl{display:grid;grid-template-columns:52px 1fr auto;gap:12px;align-items:center;padding:8px;border-radius:10px;cursor:pointer;border:0;background:transparent;text-align:left;font:inherit;color:inherit;width:100%}
+.pl:hover{background:var(--surface-2)}
+.pl img,.pl .ph{width:52px;height:52px;border-radius:8px;object-fit:cover;background:var(--surface-2)}
+.pl .t{font-weight:600;overflow-wrap:anywhere}
+.pl .s{font-size:.8rem;color:var(--muted);overflow-wrap:anywhere}
+.tr{display:grid;grid-template-columns:28px 1fr auto;gap:10px;align-items:center;padding:8px 6px;border-radius:8px;cursor:pointer;border:0;background:transparent;text-align:left;font:inherit;color:inherit;width:100%}
+.tr:hover{background:var(--surface-2)}
+.tr .n{font-family:var(--font-num);font-size:.78rem;color:var(--muted);text-align:right}
+.copybox{display:flex;gap:8px;align-items:center}
+.copybox code{flex:1;min-width:0;overflow-x:auto;white-space:nowrap;padding:8px 10px;border-radius:8px;background:var(--surface-2);border:1px solid var(--line);font-family:var(--font-num);font-size:.82rem}
+.mini{position:fixed;left:0;right:0;bottom:calc(62px + env(safe-area-inset-bottom,0px));z-index:6;background:var(--surface);border-top:1px solid var(--line);
+  padding-block:8px;padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px));
+  display:grid;grid-template-columns:40px 1fr auto auto;gap:10px;align-items:center}
+.mini img,.mini .ph{width:40px;height:40px;border-radius:8px;object-fit:cover;background:var(--surface-2)}
+.mini .t{font-weight:600;font-size:.88rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mini .s{font-size:.75rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mini button{width:40px;height:40px;padding:0;border-radius:50%}
+.mini svg{width:20px;height:20px}
+body.has-mini main{padding-bottom:170px}
+@media (min-width:900px){.mini{bottom:0}}
+/* Set logging */
+.ex2{display:grid;gap:8px;padding:12px;border-radius:12px;background:var(--surface-2);border:1px solid var(--line)}
+.ex2.done{border-color:var(--accent)}
+.ex2.done .ex-name{color:var(--accent)}
+.ex2-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.simple-cb{width:24px;height:24px;accent-color:var(--accent);flex:none}
+.mem{justify-content:flex-start;text-align:left;font-size:.8rem;font-weight:500;padding:6px 10px;background:var(--surface);color:var(--muted)}
+.mem:disabled{opacity:1;cursor:default}
+.hist{display:grid;gap:2px;padding:6px 10px;border-radius:8px;background:var(--surface);border:1px solid var(--line)}
+.hist-row{display:flex;justify-content:space-between;gap:10px;font-size:.8rem}
+.hist-row .num{font-family:var(--font-num)}
+.sets{display:grid;gap:4px}
+.set-row{display:grid;grid-template-columns:28px 1fr 1fr 44px;gap:6px;align-items:center}
+.set-row input{padding:8px;text-align:center;background:var(--surface);font-family:var(--font-num)}
+.set-row .n{font-family:var(--font-num);color:var(--muted);text-align:center}
+.set-head span{font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);text-align:center}
+.tick{width:44px;height:40px;padding:0;font-size:1.1rem;color:var(--muted)}
+.set-row.is-done input{background:var(--accent-soft);border-color:var(--accent)}
+.set-row.is-done .tick{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+button.sm{padding:6px 10px;font-size:.85rem}
+.ex-edit{display:grid;gap:6px;padding:10px;border-radius:10px;border:1px dashed var(--line)}
+/* ---------- UI refresh ---------- */
+:root{--shadow:0 1px 2px rgba(20,32,27,.05),0 6px 20px -8px rgba(20,32,27,.12);--radius:18px}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--shadow:0 1px 0 rgba(255,255,255,.03)}}
+:root[data-theme="dark"]{--shadow:0 1px 0 rgba(255,255,255,.03)}
+/* Compact one-line header */
+header.top{box-shadow:0 1px 0 var(--line);border-bottom:0}
+header.top .wrap{padding-block:10px}
+.brand{gap:8px;min-width:0}
+.brand-mark{width:28px;height:28px;border-radius:8px;flex:none}
+.brand h1{font-size:1.02rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.datenav{flex:none;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:2px}
+.datenav button{width:32px;height:32px;border:0;background:transparent;font-size:1.2rem}
+.datenav .d{min-width:84px;font-size:.88rem}
+/* Breathing room under the header */
+main{padding-block:28px 118px}
+.view{gap:16px}
+.grid2,.col{gap:16px}
+#storageNote{margin-bottom:16px}
+/* Cards */
+.card{border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;gap:14px}
+h2{font-size:1.08rem}
+.card-head{align-items:center}
+.t-info{display:inline-flex;align-items:center;gap:8px}
+.info-btn{width:22px;height:22px;padding:0;border-radius:50%;border:1.5px solid var(--muted);background:transparent;color:var(--muted);
+  font:700 .72rem/1 var(--font-body);font-style:italic;flex:none;opacity:.8}
+.info-btn:hover,.info-btn:focus-visible{opacity:1;border-color:var(--accent);color:var(--accent)}
+/* Dropdown instructions */
+details.howto{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--surface-2)}
+details.howto > summary{cursor:pointer;font-weight:600;font-size:.88rem;list-style:none;display:flex;justify-content:space-between;align-items:center}
+details.howto > summary::-webkit-details-marker{display:none}
+details.howto > summary::after{content:"▾";color:var(--muted);transition:transform .15s}
+details.howto[open] > summary::after{transform:rotate(180deg)}
+details.howto[open] > summary{margin-bottom:8px}
+details.howto ol{margin:0}
+/* Bottom tabs: active pill */
+nav.bottom{box-shadow:0 -1px 0 var(--line);border-top:0}
+nav.bottom a{gap:3px;padding:6px 2px 8px}
+nav.bottom a svg{width:22px;height:22px;padding:3px 10px;box-sizing:content-box;border-radius:99px;transition:background .15s}
+nav.bottom a[aria-current="page"] svg{background:var(--accent-soft)}
+/* Mini player */
+.mini{bottom:calc(64px + env(safe-area-inset-bottom,0px));box-shadow:0 -1px 0 var(--line),0 -8px 20px -14px rgba(0,0,0,.25);border-top:0}
+.mini .ph{display:grid;place-items:center;color:var(--accent);background:var(--accent-soft)}
+.mini .ph svg{width:20px;height:20px}
+/* Segmented control for Appearance */
+.seg.wide{display:grid;grid-template-columns:repeat(3,1fr);width:100%}
+.seg.wide button{padding:10px 6px}
+/* Guide sheet */
+.sheet{position:fixed;inset:0;z-index:30;display:grid;align-items:end}
+.sheet-backdrop{position:absolute;inset:0;background:rgba(8,14,12,.45)}
+.sheet-panel{position:relative;background:var(--surface);border-radius:22px 22px 0 0;max-height:82vh;overflow:auto;
+  padding:10px max(18px,env(safe-area-inset-right,0px)) calc(22px + env(safe-area-inset-bottom,0px)) max(18px,env(safe-area-inset-left,0px));
+  display:grid;gap:12px;animation:sheetUp .2s ease-out;max-width:640px;width:100%;margin:0 auto}
+.sheet-grab{width:40px;height:4px;border-radius:99px;background:var(--line);margin:4px auto 2px}
+.sheet-body{display:grid;gap:12px;font-size:.95rem;line-height:1.55}
+.sheet-body h3{font-size:.92rem;margin-top:4px}
+.sheet-body p,.sheet-body ul,.sheet-body ol{margin:0}
+.sheet-body ul,.sheet-body ol{padding-left:20px;display:grid;gap:6px}
+.sheet-body .tip{padding:10px 12px;border-radius:12px;background:var(--accent-soft);font-size:.88rem}
+.sheet-body code{font-family:var(--font-num);font-size:.85em;background:var(--surface-2);padding:1px 5px;border-radius:5px}
+@keyframes sheetUp{from{transform:translateY(24px);opacity:.4}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){.sheet-panel{animation:none}}
+@media (min-width:900px){.sheet{align-items:center}.sheet-panel{border-radius:22px}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent-ink)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 13h4l3-8 4 14 3-6h4"/></svg>
+      </div>
+      <h1>Lightweight Baby</h1>
+    </div>
+    <nav class="tabs" aria-label="Sections">
+      <a href="#today">Today</a><a href="#food">Food</a><a href="#move">Move</a><a href="#plan">Plan</a><a href="#music">Music</a><a href="#profile">Profile</a>
+    </nav>
+    <div class="datenav">
+      <button class="icon ghost" id="prevDay" aria-label="Previous day">&#8249;</button>
+      <div class="d" id="dateLabel">Today</div>
+      <button class="icon ghost" id="nextDay" aria-label="Next day">&#8250;</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div id="storageNote" class="notice" hidden style="margin-bottom:14px"></div>
+
+  <!-- TODAY -->
+  <section id="v-today" class="view" hidden>
+    <div class="grid2">
+      <div class="col">
+        <div class="card" id="todayHero"></div>
+        <div class="card" id="todaySteps"></div>
+      </div>
+      <div class="col">
+        <div class="card" id="todayPlan"></div>
+        <div class="card" id="todayMeals"></div>
+        <div class="card" id="trend"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOD -->
+  <section id="v-food" class="view" hidden>
+    <div class="grid2">
+      <div class="col">
+        <div class="card">
+          <div class="card-head">
+            <h2 class="t-info">Log food<button class="info-btn" type="button" data-info="logFood" aria-label="How this works">i</button></h2>
+            <div class="seg" role="group" aria-label="Input method">
+              <button id="modePhoto" aria-pressed="true">Photo</button>
+              <button id="modeText" aria-pressed="false">Describe</button>
+            </div>
+          </div>
+          <label class="field"><span>Meal</span>
+            <select id="mealType">
+              <option value="breakfast">Breakfast</option><option value="lunch">Lunch</option>
+              <option value="snack">Snack</option><option value="dinner">Dinner</option>
+            </select>
+          </label>
+          <div id="photoPane" class="view" style="gap:10px">
+            <div class="row">
+              <label class="btn primary" for="camInput" style="background:var(--accent);color:var(--accent-ink);border-color:var(--accent)">Take photo</label>
+              <label class="btn" for="fileInput">Choose photo</label>
+              <input type="file" id="camInput" accept="image/*" capture="environment" hidden>
+              <input type="file" id="fileInput" accept="image/*" hidden>
+            </div>
+            <img id="photoPreview" class="photo-preview" alt="Selected meal photo" hidden>
+            <label class="field"><span>Notes for accuracy (optional)</span>
+              <input id="photoNote" placeholder="e.g. 2 rotis, cooked in ghee, half portion">
+            </label>
+            <button id="analyzePhoto" class="primary" disabled>Estimate calories from photo</button>
+          </div>
+          <div id="textPane" class="view" style="gap:10px" hidden>
+            <label class="field"><span>What did you eat?</span>
+              <textarea id="foodText" placeholder="Type or speak it, e.g. 2 scrambled eggs, 1 slice whole-wheat toast with butter, a cappuccino"></textarea>
+            </label>
+            <div class="row">
+              <button id="analyzeText" class="primary grow">Estimate calories</button>
+              <button id="foodMic" class="mic" aria-pressed="false" aria-label="Speak what you ate" hidden>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
+                <span class="micLabel">Speak</span>
+              </button>
+            </div>
+            <p class="small muted voiceHint" style="margin:0"></p>
+          </div>
+          <div id="foodStatus"></div>
+          <div id="foodReview" hidden></div>
+          <p id="aiMissingFood" class="notice" hidden>AI estimates need your NVIDIA NIM API key. <a href="#profile" style="color:inherit;font-weight:600">Add it in Profile</a>. You can still add foods by hand below.</p>
+        </div>
+        <div class="card">
+          <h3 class="t-info">Add by hand<button class="info-btn" type="button" data-info="manualFood" aria-label="How this works">i</button></h3>
+          <div class="fields">
+            <label class="field" style="grid-column:1/-1"><span>Food</span><input id="mName" placeholder="Banana"></label>
+            <label class="field"><span>kcal</span><input id="mKcal" type="number" inputmode="numeric" min="0" placeholder="105"></label>
+            <label class="field"><span>Protein g</span><input id="mP" type="number" inputmode="decimal" min="0" placeholder="auto"></label>
+            <label class="field"><span>Carbs g</span><input id="mC" type="number" inputmode="decimal" min="0" placeholder="auto"></label>
+            <label class="field"><span>Fat g</span><input id="mF" type="number" inputmode="decimal" min="0" placeholder="auto"></label>
+          </div>
+          <button id="addManualFood">Add food</button>
+        </div>
+      </div>
+      <div class="col">
+        <div class="card" id="mealList"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MOVE -->
+  <section id="v-move" class="view" hidden>
+    <div class="grid2">
+      <div class="col">
+        <div class="card">
+          <div class="card-head"><h2 class="t-info">Steps<button class="info-btn" type="button" data-info="moveSteps" aria-label="How this works">i</button></h2><span id="stepsGoalChip" class="chip sky"></span></div>
+          <div id="stepsView"></div>
+          <div class="row">
+            <input id="stepsInput" class="grow" type="number" inputmode="numeric" min="0" placeholder="Steps so far" aria-label="Steps so far">
+            <button id="saveSteps" class="primary">Save steps</button>
+          </div>
+          <div class="row">
+            <button class="addSteps" data-n="1000">+1,000</button>
+            <button class="addSteps" data-n="2500">+2,500</button>
+            <button class="addSteps" data-n="5000">+5,000</button>
+          </div>
+          <div id="healthBox"></div>
+        </div>
+        <div class="card">
+          <h2 class="t-info">Log a workout<button class="info-btn" type="button" data-info="logWorkout" aria-label="How this works">i</button></h2>
+          <label class="field"><span>Describe it</span>
+            <textarea id="woText" placeholder="e.g. 30 min run at 6 min/km, then 3 sets of 12 push-ups and 3 x 45 s plank"></textarea>
+          </label>
+          <div class="row">
+            <button id="woAI" class="primary grow">Log with AI estimate</button>
+            <button id="woMic" class="mic" aria-pressed="false" aria-label="Speak your workout" hidden>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
+              <span class="micLabel">Speak</span>
+            </button>
+          </div>
+          <p class="small muted voiceHint" style="margin:0"></p>
+          <div id="woStatus"></div>
+          <div id="woReview" hidden></div>
+          <details>
+            <summary class="small" style="cursor:pointer;font-weight:600">Or enter it by hand</summary>
+            <div class="fields" style="margin-top:10px">
+              <label class="field"><span>Type</span>
+                <select id="wType">
+                  <option value="push" selected>Push day</option><option value="pull">Pull day</option><option value="legs">Leg day</option>
+                  <option value="strength">Strength (other)</option>
+                  <option value="walk">Walking</option><option value="run">Running</option><option value="cycle">Cycling</option>
+                  <option value="hiit">HIIT</option>
+                  <option value="swim">Swimming</option><option value="yoga">Yoga / mobility</option><option value="sport">Sports</option>
+                </select>
+              </label>
+              <label class="field"><span>Minutes</span><input id="wMin" type="number" inputmode="numeric" min="1" placeholder="40"></label>
+              <label class="field"><span>Effort</span>
+                <select id="wEffort"><option value="0.8">Easy</option><option value="1" selected>Moderate</option><option value="1.25">Hard</option></select>
+              </label>
+              <label class="field" style="grid-column:1/-1"><span>Name (optional)</span><input id="wName" placeholder="Leg day"></label>
+            </div>
+            <button id="addManualWo" style="margin-top:10px">Add workout</button>
+          </details>
+        </div>
+      </div>
+      <div class="col"><div class="card" id="woList"></div></div>
+    </div>
+  </section>
+
+  <!-- PLAN -->
+  <section id="v-plan" class="view" hidden>
+    <div class="grid2">
+      <div class="col">
+        <div class="card">
+          <h2 class="t-info">Today's workout plan<button class="info-btn" type="button" data-info="planBuilder" aria-label="How this works">i</button></h2>
+          <div id="splitInfo"></div>
+          <div class="fields">
+            <label class="field"><span>Time available</span>
+              <select id="pTime"><option>15</option><option>30</option><option selected>45</option><option>60</option><option>90</option></select>
+            </label>
+            <label class="field"><span>Focus</span>
+              <select id="pFocus">
+                <option value="auto">Next in my split</option>
+                <optgroup label="Push / Pull / Legs">
+                  <option value="push">Push (chest, shoulders, triceps)</option>
+                  <option value="pull">Pull (back, biceps, rear delts)</option>
+                  <option value="legs">Legs (quads, hamstrings, glutes)</option>
+                </optgroup>
+                <optgroup label="Other">
+                  <option value="upper">Upper body</option><option value="lower">Lower body</option><option value="full">Full body</option>
+                  <option value="cardio">Cardio / conditioning</option><option value="core">Core</option><option value="mobility">Mobility / recovery</option>
+                </optgroup>
+              </select>
+            </label>
+            <label class="field" style="grid-column:1/-1"><span>Anything to know? (optional)</span>
+              <input id="pNote" placeholder="e.g. left knee is sore, only have dumbbells today">
+            </label>
+          </div>
+          <button id="buildPlan" class="primary">Build today's plan</button>
+          <div id="planStatus"></div>
+          <p id="aiMissingPlan" class="notice" hidden>Plans are written by AI. <a href="#profile" style="color:inherit;font-weight:600">Add your NVIDIA NIM API key in Profile</a> to use it.</p>
+        </div>
+        <div class="card" id="myWorkouts"></div>
+      </div>
+      <div class="col"><div class="card" id="planView"></div></div>
+    </div>
+  </section>
+
+  <!-- MUSIC -->
+  <section id="v-music" class="view" hidden>
+    <div class="grid2">
+      <div class="col">
+        <div class="card" id="nowPlaying"></div>
+      </div>
+      <div class="col">
+        <div class="card" id="spotifyCard"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROFILE -->
+  <section id="v-profile" class="view" hidden>
+    <div class="grid2">
+      <div class="col">
+        <div class="card" id="targetsView"></div>
+        <div class="card">
+          <div class="card-head"><h2 class="t-info">NVIDIA NIM API key<button class="info-btn" type="button" data-info="apiKey" aria-label="How this works">i</button></h2><span id="keyChip" class="chip gold">Not set</span></div>
+          <p class="small muted" style="margin:0">Stored only on this phone. Tap <b>i</b> above to see how to get a free key.</p>
+          <label class="field"><span>API key</span>
+            <input id="apiKey" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="nvapi-...">
+          </label>
+          <div class="row"><button id="saveKey" class="primary grow">Save key</button><button id="clearKey" class="ghost">Remove</button></div>
+        </div>
+        <div class="card">
+          <h2 class="t-info">Appearance<button class="info-btn" type="button" data-info="appearance" aria-label="How this works">i</button></h2>
+          <div class="seg wide" role="group" aria-label="Colour mode">
+            <button type="button" data-theme-choice="system" aria-pressed="true">System</button>
+            <button type="button" data-theme-choice="light" aria-pressed="false">Light</button>
+            <button type="button" data-theme-choice="dark" aria-pressed="false">Dark</button>
+          </div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="card">
+          <h2 class="t-info">About you<button class="info-btn" type="button" data-info="profileAbout" aria-label="How this works">i</button></h2>
+          <div class="fields">
+            <label class="field" style="grid-column:1/-1"><span>Name (optional)</span><input id="fName" autocomplete="given-name" placeholder="What should the app call you?"></label>
+            <label class="field"><span>Sex</span><select id="fSex"><option value="male">Male</option><option value="female">Female</option><option value="other">Prefer not to say</option></select></label>
+            <label class="field"><span>Age</span><input id="fAge" type="number" inputmode="numeric" min="13" max="100"></label>
+            <label class="field"><span>Height (cm)</span><input id="fH" type="number" inputmode="decimal" min="100" max="250"></label>
+            <label class="field"><span>Weight (kg)</span><input id="fW" type="number" inputmode="decimal" min="30" max="300" step="0.1"></label>
+          </div>
+        </div>
+        <div class="card">
+          <h2 class="t-info">Goal and lifestyle<button class="info-btn" type="button" data-info="profileGoal" aria-label="How this works">i</button></h2>
+          <div class="fields">
+            <label class="field"><span>Goal</span>
+              <select id="fGoal"><option value="lose">Lose fat</option><option value="recomp">Lose fat, keep muscle (recomp)</option><option value="maintain" selected>Maintain</option><option value="gain">Build muscle</option></select>
+            </label>
+            <label class="field"><span>Target weight (kg)</span><input id="fGoalW" type="number" inputmode="decimal" min="30" max="300" step="0.1" placeholder="optional"></label>
+            <label class="field"><span>Pace</span>
+              <select id="fPace"><option value="0.25">Gentle (0.25 kg / week)</option><option value="0.5" selected>Steady (0.5 kg / week)</option><option value="0.75">Fast (0.75 kg / week)</option></select>
+            </label>
+            <label class="field"><span>Daily life (outside workouts)</span>
+              <select id="fAct"><option value="1.2">Mostly sitting (desk job)</option><option value="1.3" selected>On my feet some</option><option value="1.45">On my feet a lot</option></select>
+            </label>
+            <label class="field"><span>Daily step goal</span><input id="fSteps" type="number" inputmode="numeric" min="1000" step="500"></label>
+          </div>
+        </div>
+        <div class="card">
+          <h2 class="t-info">Training<button class="info-btn" type="button" data-info="profileTraining" aria-label="How this works">i</button></h2>
+          <div class="fields">
+            <label class="field"><span>Experience</span>
+              <select id="fExp"><option value="beginner">Beginner (under 6 months)</option><option value="intermediate">Intermediate (6 months – 2 years)</option><option value="advanced">Advanced (2+ years)</option></select>
+            </label>
+            <label class="field"><span>Training split</span>
+              <select id="fSplit"><option value="ppl">Push / Pull / Legs</option><option value="ul">Upper / Lower</option><option value="fb">Full body</option><option value="auto">Let the AI decide</option></select>
+            </label>
+            <label class="field"><span>Days per week</span>
+              <select id="fDays"><option>2</option><option>3</option><option selected>4</option><option>5</option><option>6</option></select>
+            </label>
+            <label class="field"><span>Usual session length</span>
+              <select id="fSess"><option value="30">30 min</option><option value="45" selected>45 min</option><option value="60">60 min</option><option value="90">90 min</option></select>
+            </label>
+            <label class="field" style="grid-column:1/-1"><span>Equipment you have</span>
+              <input id="fEquip" placeholder="e.g. full gym, or dumbbells 5–20 kg and a bench">
+            </label>
+            <label class="field" style="grid-column:1/-1"><span>Injuries or limits (optional)</span>
+              <input id="fInj" placeholder="e.g. lower back pain, no overhead pressing">
+            </label>
+          </div>
+        </div>
+        <div class="card">
+          <h2 class="t-info">Food<button class="info-btn" type="button" data-info="profileFood" aria-label="How this works">i</button></h2>
+          <div class="fields">
+            <label class="field"><span>Diet</span>
+              <select id="fDiet"><option value="none">No restrictions</option><option value="vegetarian">Vegetarian</option><option value="eggetarian">Eggetarian</option><option value="vegan">Vegan</option><option value="pescatarian">Pescatarian</option></select>
+            </label>
+            <label class="field"><span>Food you usually eat</span><input id="fCuisine" placeholder="e.g. North Indian home food"></label>
+            <label class="field" style="grid-column:1/-1"><span>Allergies or foods you avoid (optional)</span><input id="fAvoid" placeholder="e.g. peanuts, lactose"></label>
+          </div>
+        </div>
+        <button id="saveProfile" class="primary">Save profile</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div id="miniPlayer" class="mini" hidden></div>
+<div id="sheet" class="sheet" hidden>
+  <div class="sheet-backdrop" data-close-sheet></div>
+  <div class="sheet-panel" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+    <div class="sheet-grab"></div>
+    <div class="card-head"><h2 id="sheetTitle"></h2><button id="sheetClose" class="icon ghost" type="button" aria-label="Close guide" data-close-sheet>✕</button></div>
+    <div id="sheetBody" class="sheet-body"></div>
+  </div>
+</div>
+<nav class="bottom" aria-label="Sections">
+  <div class="row">
+    <a href="#today"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg>Today</a>
+    <a href="#food"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M7 3v8a2 2 0 0 0 2 2v8M11 3v8M7 7h4M17 3c-2 2-2 6 0 8v10"/></svg>Food</a>
+    <a href="#move"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 13h4l3-8 4 14 3-6h4"/></svg>Move</a>
+    <a href="#plan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 9v6M18 9v6M3 11v2M21 11v2M6 12h12"/></svg>Plan</a>
+    <a href="#music"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg>Music</a>
+    <a href="#profile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg>Profile</a>
+  </div>
+</nav>
+
+<script>
+(() => {
+'use strict';
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt = n => Math.round(+n || 0).toLocaleString();
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+
+/* ---------- dates ---------- */
+const keyOf = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const parseKey = k => { const [y,m,d] = k.split('-').map(Number); return new Date(y, m-1, d); };
+const shift = (k, n) => { const d = parseKey(k); d.setDate(d.getDate()+n); return keyOf(d); };
+const todayKey = () => keyOf(new Date());
+const labelOf = k => k === todayKey() ? 'Today' : k === shift(todayKey(), -1) ? 'Yesterday'
+  : parseKey(k).toLocaleDateString(undefined, {weekday:'short', day:'numeric', month:'short'});
+
+/* ---------- state ---------- */
+const S = { date: todayKey(), tab: 'today', loaded: false, mode: 'loading', slow: false };
+let docs = {};             // id -> body ("profile", "d-YYYY-MM-DD")
+let dbNs = null, colPath = null, sample = null, dict = null, aiImages = false, aiBlocked = false;
+
+/* ---------- storage ---------- */
+const LS = 'fuel-stride-v1';
+const lsAll = () => { try { return JSON.parse(localStorage.getItem(LS)) || {}; } catch { return {}; } };
+const lsPut = (id, body) => { try { const a = lsAll(); a[id] = body; localStorage.setItem(LS, JSON.stringify(a)); } catch {} };
+
+const pending = {}, running = {};
+function save(id, body) {
+  docs[id] = body; pending[id] = body; render(); flush(id);
+}
+async function flush(id) {
+  if (running[id]) return; running[id] = true;
+  while (pending[id]) {
+    const body = pending[id]; delete pending[id];
+    try {
+      if (dbNs) await dbNs.collection(colPath).doc(id).set(body);
+      else lsPut(id, body);
+    } catch (e) {
+      if (e?.code === 'unavailable') { pending[id] = pending[id] || body; await new Promise(r => setTimeout(r, 800 + Math.random()*800)); continue; }
+      toast(e?.code === 'quota_exceeded' ? 'Storage is full. Delete old entries to save new ones.' : 'Could not save that change. Check your connection.');
+    }
+  }
+  running[id] = false;
+}
+
+function useLocal(reason) {
+  S.mode = 'local'; docs = lsAll(); S.loaded = true;
+  const n = $('#storageNote');
+  n.textContent = reason || 'Saving on this device only. Open this page on claude.ai while signed in to sync between your phone and laptop.';
+  n.hidden = false;
+  fillProfileForm(); render();
+}
+
+function subscribe() {
+  S.mode = 'cloud';
+  const t = setTimeout(() => { S.slow = true; render(); }, 10000);
+  dbNs.collection(colPath).onSnapshot(snap => {
+    const next = {};
+    snap.docs.forEach(d => { next[d.id] = d.data(); });
+    Object.keys(pending).forEach(id => { next[id] = pending[id]; });
+    const firstLoad = !S.loaded;
+    docs = next; S.loaded = true;
+    if (!snap.metadata.fromCache) { clearTimeout(t); S.slow = false; }
+    if (firstLoad) fillProfileForm();
+    render();
+  }, err => {
+    clearTimeout(t);
+    useLocal('Your synced log could not be reached, so changes are saving on this device only for now.');
+  });
+}
+
+/* ---------- domain ---------- */
+const blankDay = k => ({ date: k, meals: [], steps: 0, workouts: [], plan: null });
+const dayId = k => 'd-' + k;
+const getDay = (k = S.date) => docs[dayId(k)] || blankDay(k);
+function editDay(fn) { const d = structuredClone(getDay()); fn(d); save(dayId(S.date), d); }
+const profile = () => docs.profile || null;
+const weight = () => +(profile()?.weightKg) || 70;
+
+function targets() {
+  const p = profile();
+  const stepGoal = +(p?.stepGoal) || 8000;
+  if (!p || !p.weightKg || !p.heightCm || !p.age) return { kcal: 2000, protein: 110, carbs: 225, fat: 67, steps: stepGoal, setup: false };
+  const w = +p.weightKg, h = +p.heightCm, a = +p.age, pace = +p.pace || 0.5;
+  const bmr = 10*w + 6.25*h - 5*a + (p.sex === 'male' ? 5 : p.sex === 'female' ? -161 : -78);
+  const base = bmr * (+p.activity || 1.3);
+  // 1 kg of body fat ≈ 7,700 kcal, so 0.5 kg/week ≈ 550 kcal/day
+  const adj = p.goal === 'lose' ? -Math.round(pace * 1100) : p.goal === 'recomp' ? -250
+    : p.goal === 'gain' ? Math.round(pace * 600) : 0;
+  const floor = p.sex === 'female' ? 1200 : 1500;
+  const kcal = Math.max(floor, Math.round((base + adj) / 10) * 10);
+  const perKg = p.goal === 'maintain' ? 1.4 : p.goal === 'recomp' ? 2.0 : 1.8;
+  const protein = Math.round(w * perKg);
+  const fat = Math.round(kcal * 0.28 / 9);
+  const carbs = Math.max(0, Math.round((kcal - protein*4 - fat*9) / 4));
+  return { kcal, protein, carbs, fat, steps: stepGoal, bmr: Math.round(bmr), tdee: Math.round(base), adj: kcal - Math.round(base), perKg, setup: true };
+}
+function totals(day) {
+  const t = { kcal: 0, p: 0, c: 0, f: 0 };
+  day.meals.forEach(m => { t.kcal += +m.kcal || 0; t.p += +m.p || 0; t.c += +m.c || 0; t.f += +m.f || 0; });
+  return t;
+}
+function burned(day) {
+  const wk = day.workouts.reduce((s, x) => s + (+x.kcal || 0), 0);
+  const st = Math.max(0, (+day.steps || 0) - 2000) * 0.0005 * weight();
+  return { workouts: Math.round(wk), steps: Math.round(st), total: Math.round(wk + st) };
+}
+const MET = { walk: 3.5, run: 9.8, cycle: 7.5, strength: 5, push: 5, pull: 5, legs: 6, hiit: 8, swim: 7, yoga: 2.5, sport: 7 };
+const TYPE_LABEL = { walk: 'Walking', run: 'Running', cycle: 'Cycling', strength: 'Strength', push: 'Push day', pull: 'Pull day', legs: 'Leg day', hiit: 'HIIT', swim: 'Swimming', yoga: 'Mobility', sport: 'Sports', plan: 'Planned session', other: 'Workout' };
+
+/* ---------- training split ---------- */
+const SPLITS = {
+  ppl: { name: 'Push / Pull / Legs', days: ['push', 'pull', 'legs'] },
+  ul:  { name: 'Upper / Lower', days: ['upper', 'lower'] },
+  fb:  { name: 'Full body', days: ['full'] },
+  auto:{ name: 'Let the AI decide', days: [] }
+};
+const DAY_LABEL = { push: 'Push', pull: 'Pull', legs: 'Legs', upper: 'Upper body', lower: 'Lower body', full: 'Full body', cardio: 'Cardio', core: 'Core', mobility: 'Mobility', rest: 'Rest' };
+const DAY_MUSCLES = {
+  push: 'chest, shoulders (front and side delts) and triceps — presses, dips, flyes, lateral raises, triceps extensions',
+  pull: 'back (lats, upper back), rear delts and biceps — pull-ups/pulldowns, rows, face pulls, curls',
+  legs: 'quads, hamstrings, glutes and calves — squats, hinges (RDL/deadlift), lunges, leg curls, calf raises',
+  upper: 'all upper-body muscles', lower: 'all lower-body muscles', full: 'the whole body',
+  cardio: 'heart and lungs — conditioning work', core: 'abs, obliques and lower back', mobility: 'joint mobility and recovery'
+};
+// Most recent training day type before a date, read from plans and logged workouts
+function recentSplitDays(beforeKey, n = 14) {
+  const out = [];
+  for (let i = 0; i <= n; i++) {
+    const k = shift(beforeKey, -i), d = docs[dayId(k)]; if (!d) continue;
+    const ws = (d.workouts || []).slice().reverse();
+    const tag = ws.map(w => w.splitDay || (['push', 'pull', 'legs'].includes(w.type) ? w.type : null)).find(Boolean)
+      || (d.plan && (d.plan.logged || planProgress(d.plan).done > 0) ? d.plan.splitDay : null);
+    if (tag && (i > 0 || ws.length)) out.push({ k, day: tag });
+  }
+  return out;
+}
+function nextSplitDay() {
+  const sp = SPLITS[profile()?.split || 'ppl'] || SPLITS.ppl;
+  if (!sp.days.length) return null;
+  const today = getDay(S.date);
+  // If today's session is already done, show what today was; otherwise the next one in the rotation
+  const last = recentSplitDays(shift(S.date, -1)).find(x => sp.days.includes(x.day));
+  if (!last) return sp.days[0];
+  return sp.days[(sp.days.indexOf(last.day) + 1) % sp.days.length];
+}
+const MEALS = ['breakfast', 'lunch', 'snack', 'dinner'];
+const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+
+/* ---------- AI ---------- */
+function aiErr(e) {
+  const c = e?.code;
+  if (c === 'no_key') return 'Add your NVIDIA NIM API key in Profile first.';
+  if (c === 'auth') return 'Your NVIDIA API key was rejected. Check it in Profile.';
+  if (c === 'billing') return 'Your NVIDIA account is out of credits. Check build.nvidia.com.';
+  if (c === 'network') return 'No internet connection. Check your connection and try again.';
+  if (c === 'timeout') return 'NVIDIA stayed silent for 10 minutes, so the request was stopped. Their servers are probably overloaded. Try again in a few minutes.';
+  if (c === 'connection_lost') return 'The connection to NVIDIA dropped before the answer finished. Try again.';
+  if (c === 'model_unavailable') return 'NVIDIA says the Nemotron model isn’t available to your key right now. Try again later.';
+  if (c === 'bad_request') return 'NVIDIA could not process that request. Try a different photo or description.';
+  if (c === 'empty_completion') return 'The AI returned an empty answer. Try again.';
+  if (c === 'too_long') return 'The AI ran out of room before answering. Try a shorter session or simpler request.';
+  if (c === 'not_granted' || c === 'sampling_disabled' || c === 'not_declared' || c === 'capability_disabled') { aiBlocked = true; applyAiAvailability(); return 'Claude access is off for this page, so AI estimates are unavailable on this visit. You can still log things by hand.'; }
+  if (c === 'rate_limited') return 'NVIDIA servers are busy, or your free credits ran out. Wait a minute, then try again.';
+  if (c === 'invalid_json') return 'The AI replied in an unexpected format. Try again.';
+  if (c === 'image_rejected') return 'That photo could not be read. Try a JPEG or PNG under 20 MB.';
+  if (c === 'images_unavailable') return 'Photos can\'t be sent to Claude from this view. Use Describe instead.';
+  if (c === 'refused') return 'The AI could not estimate this. Try describing it differently.';
+  if (c === 'session_expired') return 'Sign-in expired. Try again.';
+  if (c === 'cancelled') return '';
+  return 'Something went wrong reaching NVIDIA NIM. Try again.';
+}
+const thinking = msg => `<div class="thinking"><span class="dot"></span><span>${esc(msg)}<br><span class="ai-progress small"></span></span></div>`;
+const errBox = msg => msg ? `<div class="notice err">${esc(msg)}</div>` : '';
+
+const FOOD_FORMAT = `Reply with only JSON in exactly this shape:
+{"items":[{"name":"Chicken biryani","portion":"1 plate (~350 g)","kcal":520,"protein_g":24,"carbs_g":62,"fat_g":18}],"note":"One short sentence on your main assumptions."}
+Rules: one entry per distinct food or drink; realistic typical portions when size is unclear; account for cooking oil, butter, sauces and sugar in drinks; whole numbers only. If there is no food, return {"items":[],"note":"<why>"}.`;
+
+function foodContext() {
+  const p = profile() || {};
+  const bits = [];
+  if (p.cuisine) bits.push(`They usually eat ${p.cuisine}; assume that style of cooking and portion when unclear.`);
+  if (p.diet && p.diet !== 'none') bits.push(`They are ${p.diet}.`);
+  return bits.length ? '\n' + bits.join(' ') : '';
+}
+// Reads a number even when the model writes "45 g" or uses a slightly different field name
+const gNum = (...vals) => { for (const v of vals) { const n = parseFloat(String(v ?? '').replace(',', '.')); if (isFinite(n)) return Math.max(0, Math.round(n)); } return 0; };
+function cleanItems(arr) {
+  return (Array.isArray(arr) ? arr : []).map(x => ({
+    id: uid(), name: String(x.name || 'Food').slice(0, 80), portion: String(x.portion || '').slice(0, 60),
+    kcal: gNum(x.kcal, x.calories, x.energy_kcal),
+    p: gNum(x.protein_g, x.protein, x.proteins_g),
+    c: gNum(x.carbs_g, x.carbs, x.carbohydrates_g, x.carbohydrates, x.carb_g),
+    f: gNum(x.fat_g, x.fat, x.fats_g, x.total_fat_g),
+    macrosChecked: true
+  })).filter(x => x.name);
+}
+// Meals saved without carbs/fat (older hand-added entries)
+const missingMacros = m => +m.kcal > 0 && !m.macrosChecked && !(+m.c) && !(+m.f);
+// Asks the AI for protein/carbs/fat of foods whose calories are known, keeping those calories fixed
+async function fillMacros(dateKey, ids, quiet) {
+  if (!sample) { if (!quiet) toast('Add your NVIDIA key in Profile to fill in carbs and fat.'); return false; }
+  const day = docs[dayId(dateKey)] || blankDay(dateKey);
+  const foods = day.meals.filter(m => ids.includes(m.id));
+  if (!foods.length) return false;
+  const list = foods.map((m, i) => `${i + 1}. ${m.name}${m.portion ? ` (${m.portion})` : ''}: ${m.kcal} kcal${+m.p ? `, ${m.p} g protein (known)` : ''}`).join('\n');
+  try {
+    const r = await sample.json(`You are a nutrition estimator. For each food below, the calories are already known. Estimate protein, carbs and fat in grams so that protein×4 + carbs×4 + fat×9 is close to the calories given. Keep any protein marked "known".${foodContext()}
+${list}
+Reply with only JSON: {"items":[{"n":1,"protein_g":0,"carbs_g":0,"fat_g":0}]} with one entry per food, in the same order. Whole numbers.`, { modelTier: 'quick' });
+    const out = Array.isArray(r?.items) ? r.items : Array.isArray(r) ? r : [];
+    const d = structuredClone(docs[dayId(dateKey)] || blankDay(dateKey));
+    let n = 0;
+    foods.forEach((f, i) => {
+      const a = out.find(o => +o.n === i + 1) || out[i]; if (!a) return;
+      const m = d.meals.find(x => x.id === f.id); if (!m) return;
+      if (!(+m.p)) m.p = gNum(a.protein_g, a.protein);
+      m.c = gNum(a.carbs_g, a.carbs, a.carbohydrates_g); m.f = gNum(a.fat_g, a.fat);
+      m.macrosChecked = true; n++;
+    });
+    d.meals.forEach(m => { if (ids.includes(m.id)) delete m.macrosPending; });
+    save(dayId(dateKey), d);
+    if (!quiet) toast(n ? `Filled in macros for ${n} food${n > 1 ? 's' : ''}` : 'Could not estimate macros. Try again.');
+    return n > 0;
+  } catch (e) {
+    const d = structuredClone(docs[dayId(dateKey)] || blankDay(dateKey));
+    d.meals.forEach(m => { if (ids.includes(m.id)) delete m.macrosPending; }); save(dayId(dateKey), d);
+    if (!quiet) toast(aiErr(e) || 'Could not estimate macros.');
+    return false;
+  }
+}
+
+let foodDraft = null, foodSrc = 'text';
+async function analyzeFood(kind) {
+  if (!sample) return;
+  const status = $('#foodStatus'); $('#foodReview').hidden = true;
+  let prompt, opts = { modelTier: 'default' };
+  if (kind === 'photo') {
+    if (!photoFile) return;
+    const note = $('#photoNote').value.trim();
+    prompt = `You are a careful nutrition estimator. The attached photo shows a meal. Identify every food and drink visible, estimate each portion from visual cues (plate size, utensils, hands), and estimate calories and macros.${foodContext()}${note ? `\nThe person added this note: "${note}". Trust it over what the photo suggests.` : ''}\n\n${FOOD_FORMAT}`;
+    opts.images = [photoFile];
+  } else {
+    const text = $('#foodText').value.trim();
+    if (!text) { status.innerHTML = errBox('Write what you ate first.'); return; }
+    prompt = `You are a careful nutrition estimator. A person describes what they ate, possibly by speaking, so the text may be informal, have filler words, or correct itself ("two rotis, no actually three"). Use their final intent:\n"""${text.slice(0, 2000)}"""\nSplit it into individual foods and drinks and estimate calories and macros for the amounts stated (typical servings if no amount is given).${foodContext()}\n\n${FOOD_FORMAT}`;
+  }
+  foodSrc = kind;
+  setBusy(['#analyzePhoto', '#analyzeText'], true);
+  status.innerHTML = thinking(kind === 'photo' ? 'Looking at your photo…' : 'Estimating…');
+  try {
+    const res = await sample.json(prompt, opts);
+    const items = cleanItems(res?.items);
+    status.innerHTML = '';
+    if (!items.length) { status.innerHTML = errBox(res?.note || 'No food was found. Try another photo or describe it.'); return; }
+    foodDraft = { items, note: String(res?.note || '') };
+    renderFoodReview();
+  } catch (e) { status.innerHTML = errBox(aiErr(e)); }
+  finally { setBusy(['#analyzePhoto', '#analyzeText'], false); if (!photoFile) $('#analyzePhoto').disabled = true; }
+}
+function renderFoodReview() {
+  const box = $('#foodReview');
+  if (!foodDraft) { box.hidden = true; return; }
+  const total = foodDraft.items.reduce((s, x) => s + (+x.kcal || 0), 0);
+  box.innerHTML = `<div class="review">
+    <div class="card-head"><h3>Check and adjust</h3><span class="num" style="font-weight:600">${fmt(total)} kcal</span></div>
+    ${foodDraft.note ? `<p class="small muted" style="margin:0">${esc(foodDraft.note)}</p>` : ''}
+    ${foodDraft.items.map((x, i) => `<div class="review-row">
+        <input data-i="${i}" data-k="name" value="${esc(x.name)}" aria-label="Food name">
+        <input data-i="${i}" data-k="kcal" type="number" inputmode="numeric" value="${x.kcal}" aria-label="Calories for ${esc(x.name)}">
+        <button class="icon ghost" data-del="${i}" aria-label="Remove ${esc(x.name)}" style="width:34px;height:34px">&times;</button>
+        <div class="macros">${esc(x.portion)}${x.portion ? ' · ' : ''}P ${x.p} g · C ${x.c} g · F ${x.f} g</div>
+      </div>`).join('')}
+    <div class="row"><button class="primary grow" id="confirmFood">Add to ${esc(cap($('#mealType').value))}</button><button class="ghost" id="discardFood">Discard</button></div>
+  </div>`;
+  box.hidden = false;
+  box.querySelectorAll('input[data-i]').forEach(inp => inp.addEventListener('input', () => {
+    const it = foodDraft.items[+inp.dataset.i];
+    if (inp.dataset.k === 'kcal') {
+      const old = it.kcal || 1, nv = Math.max(0, Math.round(+inp.value || 0));
+      const r = nv / old; if (old > 0 && nv > 0) { it.p = Math.round(it.p*r); it.c = Math.round(it.c*r); it.f = Math.round(it.f*r); }
+      it.kcal = nv;
+    } else it.name = inp.value;
+  }));
+  box.querySelectorAll('input[data-k="kcal"]').forEach(inp => inp.addEventListener('change', renderFoodReview));
+  box.querySelectorAll('[data-del]').forEach(b => b.onclick = () => { foodDraft.items.splice(+b.dataset.del, 1); if (!foodDraft.items.length) foodDraft = null; renderFoodReview(); });
+  $('#confirmFood').onclick = () => {
+    const meal = $('#mealType').value, at = new Date().toISOString();
+    editDay(d => { foodDraft.items.forEach(x => d.meals.push({ ...x, id: uid(), meal, src: foodSrc, at })); });
+    toast(`Added ${foodDraft.items.length} item${foodDraft.items.length > 1 ? 's' : ''} to ${cap(meal)}`);
+    foodDraft = null; renderFoodReview(); $('#foodText').value = ''; clearPhoto();
+  };
+  $('#discardFood').onclick = () => { foodDraft = null; renderFoodReview(); };
+}
+
+let woDraft = null;
+async function analyzeWorkout() {
+  if (!sample) return;
+  const text = $('#woText').value.trim(), status = $('#woStatus');
+  if (!text) { status.innerHTML = errBox('Describe your workout first.'); return; }
+  setBusy(['#woAI'], true); status.innerHTML = thinking('Estimating calories burned…');
+  try {
+    const res = await sample.json(`You estimate exercise energy expenditure using MET values. The person weighs ${weight()} kg${profile()?.age ? `, is ${profile().age} years old` : ''}.
+They describe their workout, possibly by speaking, so the text may be informal or correct itself; use their final intent:\n"""${text.slice(0, 2000)}"""
+Group it into sessions (e.g. a run and a strength circuit are two). Estimate active minutes and net calories burned for each (exclude resting metabolism). Write "detail" as a tidy summary of what they did (exercises, sets × reps, distance). Reply with only JSON:
+{"items":[{"name":"Push day","type":"push","minutes":50,"kcal":240,"detail":"Bench 4×8, OHP 3×10, dips 3×12, lateral raises 3×15"}]}
+"type" is one of push (chest/shoulders/triceps), pull (back/biceps), legs, strength (other or mixed lifting), walk, run, cycle, hiit, swim, yoga, sport, other. Whole numbers only.`, { modelTier: 'quick' });
+    const items = (Array.isArray(res?.items) ? res.items : []).map(x => ({
+      id: uid(), name: String(x.name || 'Workout').slice(0, 80), type: MET[x.type] ? x.type : 'other',
+      minutes: Math.max(0, Math.round(+x.minutes || 0)), kcal: Math.max(0, Math.round(+x.kcal || 0)), detail: String(x.detail || '').slice(0, 120)
+    }));
+    status.innerHTML = '';
+    if (!items.length) { status.innerHTML = errBox('No workout found in that description.'); return; }
+    woDraft = items; renderWoReview();
+  } catch (e) { status.innerHTML = errBox(aiErr(e)); }
+  finally { setBusy(['#woAI'], false); }
+}
+function renderWoReview() {
+  const box = $('#woReview');
+  if (!woDraft) { box.hidden = true; return; }
+  box.innerHTML = `<div class="review"><h3>Check and adjust</h3>
+    ${woDraft.map((x, i) => `<div class="review-row">
+      <input data-i="${i}" data-k="name" value="${esc(x.name)}" aria-label="Workout name">
+      <input data-i="${i}" data-k="kcal" type="number" inputmode="numeric" value="${x.kcal}" aria-label="Calories burned">
+      <button class="icon ghost" data-del="${i}" aria-label="Remove" style="width:34px;height:34px">&times;</button>
+      <div class="macros">${esc(TYPE_LABEL[x.type])} · ${x.minutes} min${x.detail ? ' · ' + esc(x.detail) : ''}</div></div>`).join('')}
+    <div class="row"><button class="primary grow" id="confirmWo">Add workout</button><button class="ghost" id="discardWo">Discard</button></div></div>`;
+  box.hidden = false;
+  box.querySelectorAll('input[data-i]').forEach(inp => inp.addEventListener('input', () => {
+    const it = woDraft[+inp.dataset.i]; if (inp.dataset.k === 'kcal') it.kcal = Math.max(0, Math.round(+inp.value || 0)); else it.name = inp.value;
+  }));
+  box.querySelectorAll('[data-del]').forEach(b => b.onclick = () => { woDraft.splice(+b.dataset.del, 1); if (!woDraft.length) woDraft = null; renderWoReview(); });
+  $('#confirmWo').onclick = () => {
+    const at = new Date().toISOString();
+    editDay(d => woDraft.forEach(x => d.workouts.push({ ...x, id: uid(), at })));
+    toast('Workout logged'); woDraft = null; renderWoReview(); $('#woText').value = '';
+  };
+  $('#discardWo').onclick = () => { woDraft = null; renderWoReview(); };
+}
+
+async function buildPlan() {
+  if (!sample) return;
+  const status = $('#planStatus'), p = profile() || {}, t = targets(), day = getDay();
+  const hist = [];
+  for (let i = 1; i <= 7; i++) {
+    const k = shift(S.date, -i), d = docs[dayId(k)];
+    if (d && (d.workouts?.length || d.steps)) hist.push(`${k}: ${d.workouts.map(w => `${w.name} (${TYPE_LABEL[w.type] || w.type}, ${w.minutes} min)`).join('; ') || 'no workout'}; ${fmt(d.steps)} steps`);
+  }
+  const eaten = totals(day);
+  const focus = $('#pFocus').value, mins = $('#pTime').value, note = $('#pNote').value.trim();
+  const splitKey = p.split || 'ppl', sp = SPLITS[splitKey] || SPLITS.ppl;
+  const target = focus === 'auto' ? nextSplitDay() : focus;
+  const recent = recentSplitDays(shift(S.date, -1), 7).map(x => `${x.k}: ${DAY_LABEL[x.day] || x.day}`).join(', ');
+  const focusLine = target
+    ? `Today is a ${DAY_LABEL[target]} day${focus === 'auto' ? ` (next in their ${sp.name} rotation)` : ''}. Train ${DAY_MUSCLES[target] || target}. Keep other muscle groups out of the main block. If the last 7 days show they are clearly overtrained or sore, you may switch to recovery, and explain why.`
+    : 'Choose the best focus given recent training: avoid hitting the same muscles two days running, and schedule recovery if training has been heavy.';
+  const prompt = `You are an experienced strength coach. Write one workout for today.
+Person: ${p.age ? p.age + ' years old, ' : ''}${p.sex && p.sex !== 'other' ? p.sex + ', ' : ''}${weight()} kg${p.heightCm ? ', ' + p.heightCm + ' cm' : ''}. Goal: ${p.goal || 'maintain'}. Experience: ${p.experience || 'beginner'}. Equipment: ${p.equipment || 'bodyweight only'}.
+Training split: ${sp.name}, ${p.days || 4} days a week. Recent split days: ${recent || 'none logged'}.${p.injuries ? `\nInjuries or limits: ${p.injuries}. Avoid exercises that aggravate these and offer safe swaps.` : ''}
+Today so far: ${fmt(eaten.kcal)} of ${fmt(t.kcal)} kcal eaten, ${fmt(eaten.p)} g protein, ${fmt(day.steps)} steps (goal ${fmt(t.steps)}), ${day.workouts.length ? 'already did: ' + day.workouts.map(w => w.name).join(', ') : 'no workout yet'}.
+Last 7 days: ${hist.length ? '\n' + hist.join('\n') : 'nothing logged'}.
+Time available: ${mins} minutes. ${focusLine}${note ? `\nThe person says: "${note.slice(0, 300)}". Respect it.` : ''}
+For lifts, give sets × reps and a target effort (e.g. "RIR 2" = 2 reps left in the tank). Order compound lifts before isolation work.
+${liftMemoryForPrompt()}
+For each weighted lift include "kg": the working weight to use today. Base it on their recent lifts above: if they completed every set at the top of the rep range, add about 2.5 kg (upper body) or 5 kg (lower body); if they missed reps, keep the weight. For new lifts, pick a conservative starting weight for their experience. Use 0 for bodyweight or timed exercises. Prefer exercises they have done before when they fit today's focus, so progress can be tracked.
+Reply with only JSON:
+{"title":"Push day: chest & shoulders","split_day":"push","focus":"Chest, shoulders, triceps","minutes":45,"intensity":"moderate","why":"1–2 sentences on why this fits today, referencing their recent days.","est_kcal":250,
+"blocks":[{"name":"Warm-up","exercises":[{"name":"Band pull-aparts","dose":"2 × 15","rest":"","tip":"Squeeze shoulder blades"}]},{"name":"Main","exercises":[{"name":"Barbell bench press","dose":"4 × 6–8, RIR 2","kg":60,"rest":"2 min","tip":"Feet planted, slight arch"}]},{"name":"Finisher","exercises":[...]},{"name":"Cool-down","exercises":[...]}]}
+"split_day" is one of push, pull, legs, upper, lower, full, cardio, core, mobility, rest. Fit the time limit. Use only the listed equipment. "intensity" is low, moderate or high.`;
+  setBusy(['#buildPlan'], true); status.innerHTML = thinking('Building your plan… usually under a minute.');
+  try {
+    const r = await sample.json(prompt, { modelTier: 'complex', cache: false });
+    const blocks = (Array.isArray(r?.blocks) ? r.blocks : []).map(b => ({
+      name: String(b.name || 'Block').slice(0, 40),
+      exercises: (Array.isArray(b.exercises) ? b.exercises : []).slice(0, 12).map(x => ({ name: String(x.name || '').slice(0, 80), dose: String(x.dose || '').slice(0, 40), kg: Math.max(0, +x.kg || 0), rest: String(x.rest || '').slice(0, 20), tip: String(x.tip || '').slice(0, 140) })).filter(x => x.name)
+    })).filter(b => b.exercises.length);
+    if (!blocks.length) throw { code: 'invalid_json' };
+    const plan = { title: String(r.title || 'Today\'s workout').slice(0, 80), focus: String(r.focus || '').slice(0, 60), minutes: Math.round(+r.minutes || +mins),
+      splitDay: DAY_LABEL[r.split_day] ? r.split_day : (target || null),
+      intensity: ['low', 'moderate', 'high'].includes(r.intensity) ? r.intensity : 'moderate', why: String(r.why || '').slice(0, 400),
+      est_kcal: Math.max(0, Math.round(+r.est_kcal || 0)), blocks, done: {}, logged: false, made: new Date().toISOString() };
+    editDay(d => { d.plan = plan; });
+    status.innerHTML = '';
+  } catch (e) { status.innerHTML = errBox(aiErr(e)); }
+  finally { setBusy(['#buildPlan'], false); }
+}
+
+/* ---------- rendering ---------- */
+function ring(frac, color, size = 150, stroke = 13) {
+  const r = (size - stroke) / 2, c = 2 * Math.PI * r, f = Math.max(0, Math.min(1, frac));
+  return `<svg viewBox="0 0 ${size} ${size}" aria-hidden="true">
+    <circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="var(--surface-2)" stroke-width="${stroke}"/>
+    <circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="${color}" stroke-width="${stroke}" stroke-linecap="round" stroke-dasharray="${(c*f).toFixed(1)} ${c.toFixed(1)}"/></svg>`;
+}
+const macroBar = (label, v, goal, color) => `<div class="macro"><div class="top"><span>${label}</span><span class="num">${fmt(v)} / ${fmt(goal)} g</span></div>
+  <div class="bar"><i style="width:${Math.min(100, goal ? v/goal*100 : 0)}%;background:${color}"></i></div></div>`;
+
+function renderToday() {
+  const day = getDay(), t = targets(), e = totals(day), b = burned(day);
+  const budget = t.kcal + b.total, left = budget - e.kcal, over = left < 0;
+  $('#todayHero').innerHTML = `
+    <div class="card-head"><h2 class="t-info">Calories<button class="info-btn" type="button" data-info="calories" aria-label="How this works">i</button></h2>${t.setup ? `<span class="chip accent">${esc(cap(profile().goal || 'maintain'))} · ${fmt(t.kcal)} kcal</span>` : `<a href="#profile" class="chip gold" style="text-decoration:none">Set up profile for a personal target</a>`}</div>
+    <div class="hero">
+      <div class="ring">${ring(budget ? e.kcal / budget : 0, over ? 'var(--bad)' : 'var(--ember)')}
+        <div class="center"><span class="big">${fmt(Math.abs(left))}</span><span class="small muted">${over ? 'kcal over' : 'kcal left'}</span></div></div>
+      <div class="stats">
+        <div class="stat"><div class="label">Target</div><div class="v">${fmt(t.kcal)}</div></div>
+        <div class="stat"><div class="label">Eaten</div><div class="v" style="color:var(--ember)">${fmt(e.kcal)}</div></div>
+        <div class="stat"><div class="label">Workouts</div><div class="v" style="color:var(--accent)">+${fmt(b.workouts)}</div></div>
+        <div class="stat"><div class="label">Steps bonus</div><div class="v" style="color:var(--sky)">+${fmt(b.steps)}</div></div>
+      </div>
+    </div>
+    <div class="equation num">${fmt(t.kcal)} target + ${fmt(b.total)} burned − ${fmt(e.kcal)} eaten = ${over ? '−' : ''}${fmt(Math.abs(left))} kcal</div>
+    ${macroBar('Protein', e.p, t.protein, 'var(--accent)')}
+    ${macroBar('Carbs', e.c, t.carbs, 'var(--gold)')}
+    ${macroBar('Fat', e.f, t.fat, 'var(--ember)')}
+    ${macrosMissingNote(day, 'fillMacrosToday')}`;
+  wireFillMacros('fillMacrosToday');
+
+  const sf = t.steps ? day.steps / t.steps : 0;
+  $('#todaySteps').innerHTML = `<div class="card-head"><h2 class="t-info">Steps<button class="info-btn" type="button" data-info="todaySteps" aria-label="How this works">i</button></h2><a href="#move" class="small" style="color:var(--accent);font-weight:600">Update</a></div>
+    <div class="row" style="gap:16px;flex-wrap:nowrap">
+      <div class="ring" style="width:84px;height:84px;flex:none">${ring(sf, 'var(--sky)', 84, 10)}<div class="center"><span class="num small" style="font-weight:600">${Math.round(sf*100)}%</span></div></div>
+      <div><div class="steps-big">${fmt(day.steps)}</div><div class="small muted">of ${fmt(t.steps)} goal · about ${(day.steps * 0.00076).toFixed(1)} km</div></div>
+    </div>`;
+
+  const pl = day.plan;
+  if (pl) {
+    const prog = planProgress(pl), all = { length: prog.total }, done = prog.done;
+    $('#todayPlan').innerHTML = `<div class="card-head"><h2 class="t-info">Workout plan<button class="info-btn" type="button" data-info="todayPlan" aria-label="How this works">i</button></h2><span class="chip ${pl.logged ? 'accent' : 'gold'}">${pl.logged ? 'Done' : `${done}/${all.length} exercises`}</span></div>
+      <div><div style="font-weight:600">${esc(pl.title)}</div><div class="small muted">${pl.minutes} min · ${esc(pl.intensity)} · ~${fmt(pl.est_kcal)} kcal</div></div>
+      <div class="bar"><i style="width:${all.length ? done/all.length*100 : 0}%;background:var(--accent)"></i></div>
+      <a href="#plan" class="btn" style="text-decoration:none">Open plan</a>`;
+  } else {
+    $('#todayPlan').innerHTML = `<div class="card-head"><h2 class="t-info">Workout plan<button class="info-btn" type="button" data-info="todayPlan" aria-label="How this works">i</button></h2></div>
+      ${nextSplitDay() ? `<div><span class="chip gold">Next up: ${esc(DAY_LABEL[nextSplitDay()])} day</span></div>` : ''}
+      <p class="muted" style="margin:0">No plan for ${S.date === todayKey() ? 'today' : 'this day'} yet. The AI can build one around your split, recent training and time available.</p>
+      <a href="#plan" class="btn primary" style="text-decoration:none;background:var(--accent);color:var(--accent-ink);border-color:var(--accent)">Suggest a workout</a>`;
+  }
+  $('#todayMeals').innerHTML = `<div class="card-head"><h2 class="t-info">Meals<button class="info-btn" type="button" data-info="meals" aria-label="How this works">i</button></h2><a href="#food" class="small" style="color:var(--accent);font-weight:600">Log food</a></div>` +
+    (day.meals.length ? MEALS.map(m => { const xs = day.meals.filter(x => x.meal === m); if (!xs.length) return '';
+      return `<div class="item" style="grid-template-columns:1fr auto"><div><div class="name">${cap(m)}</div><div class="sub">${esc(xs.map(x => x.name).join(', '))}</div></div><div class="k">${fmt(xs.reduce((s, x) => s + (+x.kcal || 0), 0))}</div></div>`; }).join('')
+      : `<div class="empty">Nothing logged yet. Snap a photo of your next meal or describe it.</div>`);
+  renderTrend();
+}
+
+function renderTrend() {
+  const t = targets(), keys = Array.from({ length: 7 }, (_, i) => shift(S.date, i - 6));
+  const rows = keys.map(k => { const d = docs[dayId(k)] || blankDay(k); return { k, kcal: totals(d).kcal, steps: +d.steps || 0 }; });
+  const W = 320, H = 120, pad = 22, bw = (W - pad) / 7;
+  const maxK = Math.max(t.kcal * 1.25, ...rows.map(r => r.kcal), 1), maxS = Math.max(t.steps * 1.25, ...rows.map(r => r.steps), 1);
+  const yK = v => H - 16 - (v / maxK) * (H - 30), yS = v => H - 16 - (v / maxS) * (H - 30);
+  const bars = (yf, key, color, tgt, maxV) => `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${key === 'kcal' ? 'Calories eaten' : 'Steps'}, last 7 days">
+    <line x1="${pad}" x2="${W}" y1="${yf(tgt)}" y2="${yf(tgt)}" stroke="var(--muted)" stroke-dasharray="3 3" stroke-width="1"/>
+    <text x="0" y="${yf(tgt) + 3}">${tgt >= 1000 ? Math.round(tgt / 100) / 10 + 'k' : tgt}</text>
+    ${rows.map((r, i) => { const x = pad + i * bw + bw * 0.18, w = bw * 0.64, y = yf(r[key]); const sel = r.k === S.date;
+      return `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${w.toFixed(1)}" height="${Math.max(0, H - 16 - y).toFixed(1)}" rx="3" fill="${color}" opacity="${sel ? 1 : 0.55}"/>
+      <text x="${(x + w / 2).toFixed(1)}" y="${H - 3}" text-anchor="middle">${parseKey(r.k).toLocaleDateString(undefined, { weekday: 'narrow' })}</text>`; }).join('')}
+  </svg>`;
+  const avg = Math.round(rows.reduce((s, r) => s + r.kcal, 0) / 7), avgS = Math.round(rows.reduce((s, r) => s + r.steps, 0) / 7);
+  $('#trend').innerHTML = `<div class="card-head"><h2 class="t-info">Last 7 days<button class="info-btn" type="button" data-info="trend" aria-label="How this works">i</button></h2><span class="small muted">dashed line = target</span></div>
+    <div><div class="row" style="justify-content:space-between"><span class="label">Calories eaten</span><span class="small num muted">avg ${fmt(avg)}</span></div>${bars(yK, 'kcal', 'var(--ember)', t.kcal)}</div>
+    <div><div class="row" style="justify-content:space-between"><span class="label">Steps</span><span class="small num muted">avg ${fmt(avgS)}</span></div>${bars(yS, 'steps', 'var(--sky)', t.steps)}</div>`;
+}
+
+function renderFood() {
+  const day = getDay(), e = totals(day);
+  $('#mealList').innerHTML = `<div class="card-head"><h2 class="t-info">${esc(labelOf(S.date))}'s food<button class="info-btn" type="button" data-info="mealList" aria-label="How this works">i</button></h2><span class="num" style="font-weight:600">${fmt(e.kcal)} kcal</span></div>` +
+    (day.meals.length ? `<div class="list">${MEALS.map(m => { const xs = day.meals.filter(x => x.meal === m); if (!xs.length) return '';
+      return `<div class="group-title"><span class="label">${cap(m)}</span><span class="small num muted">${fmt(xs.reduce((s, x) => s + (+x.kcal || 0), 0))} kcal</span></div>` +
+        xs.map(x => `<div class="item"><div><div class="name">${esc(x.name)}</div><div class="sub">${x.portion ? esc(x.portion) + ' · ' : ''}${x.macrosPending ? 'Estimating carbs and fat…' : missingMacros(x) ? `P ${fmt(x.p)} · <b style="color:var(--ember)">carbs/fat missing</b>` : `P ${fmt(x.p)} · C ${fmt(x.c)} · F ${fmt(x.f)}`}${x.src === 'photo' ? ' · from photo' : ''}</div></div>
+          <div class="k">${fmt(x.kcal)}</div><button data-delmeal="${esc(x.id)}" aria-label="Delete ${esc(x.name)}">&times;</button></div>`).join(''); }).join('')}</div>`
+      : `<div class="empty">No food logged for this day.</div>`) + macrosMissingNote(day, 'fillMacrosFood');
+  $$('[data-delmeal]').forEach(b => b.onclick = () => editDay(d => { d.meals = d.meals.filter(x => x.id !== b.dataset.delmeal); }));
+  wireFillMacros('fillMacrosFood');
+}
+// "N foods have no carbs/fat" + a Fill in button, shown on Food and Today
+function macrosMissingNote(day, btnId) {
+  const miss = day.meals.filter(m => missingMacros(m) && !m.macrosPending);
+  if (!miss.length) return '';
+  return `<div class="notice" style="display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap">
+    <span>${miss.length} food${miss.length > 1 ? 's have' : ' has'} no carbs/fat yet, so those totals are too low.</span>
+    <button id="${btnId}" class="primary sm" ${sample ? '' : 'disabled'}>${sample ? 'Fill in with AI' : 'Needs API key'}</button></div>`;
+}
+function wireFillMacros(btnId) {
+  const b = document.getElementById(btnId); if (!b) return;
+  b.onclick = () => {
+    const k = S.date, ids = getDay().meals.filter(m => missingMacros(m) && !m.macrosPending).map(m => m.id);
+    if (!ids.length) return;
+    const d = structuredClone(getDay()); d.meals.forEach(m => { if (ids.includes(m.id)) m.macrosPending = true; }); save(dayId(k), d);
+    toast('Estimating carbs and fat…');
+    fillMacros(k, ids, false);
+  };
+}
+
+function renderMove() {
+  const day = getDay(), t = targets(), b = burned(day);
+  $('#stepsGoalChip').textContent = `Goal ${fmt(t.steps)}`;
+  $('#stepsView').innerHTML = `<div class="row" style="justify-content:space-between;align-items:end">
+    <div><div class="steps-big">${fmt(day.steps)}</div><div class="small muted">≈ ${(day.steps * 0.00076).toFixed(1)} km · +${fmt(b.steps)} kcal above a 2,000-step baseline</div></div></div>
+    <div class="bar"><i style="width:${Math.min(100, t.steps ? day.steps / t.steps * 100 : 0)}%;background:var(--sky)"></i></div>`;
+  $('#woList').innerHTML = `<div class="card-head"><h2 class="t-info">Workouts<button class="info-btn" type="button" data-info="workoutList" aria-label="How this works">i</button></h2><span class="num" style="font-weight:600">${fmt(b.workouts)} kcal</span></div>` +
+    (day.workouts.length ? `<div class="list">${day.workouts.map(w => `<div class="item"><div><div class="name">${esc(w.name)}</div>
+      <div class="sub">${esc(TYPE_LABEL[w.type] || 'Workout')} · ${fmt(w.minutes)} min${w.detail ? ' · ' + esc(w.detail) : ''}</div></div>
+      <div class="k">${fmt(w.kcal)}</div><button data-delwo="${esc(w.id)}" aria-label="Delete ${esc(w.name)}">&times;</button></div>`).join('')}</div>`
+      : `<div class="empty">No workouts logged for this day.</div>`);
+  $$('[data-delwo]').forEach(btn => btn.onclick = () => editDay(d => {
+    d.workouts = d.workouts.filter(x => x.id !== btn.dataset.delwo);
+    if (d.plan && btn.dataset.delwo === 'plan-' + d.date) d.plan.logged = false;
+  }));
+}
+
+function renderPlan() {
+  const pl = getDay().plan, box = $('#planView');
+  $('#buildPlan').textContent = pl ? 'Build a new plan' : 'Build today\'s plan';
+  const sp = SPLITS[profile()?.split || 'ppl'] || SPLITS.ppl, nx = nextSplitDay();
+  const hist = recentSplitDays(shift(S.date, -1), 7).slice(0, 4).map(x => `${DAY_LABEL[x.day] || x.day} (${esc(labelOf(x.k))})`).join(' → ');
+  $('#splitInfo').innerHTML = sp.days.length ? `<div class="row" style="gap:6px">
+      <span class="chip accent">${esc(sp.name)}</span>${nx ? `<span class="chip gold">Next up: ${esc(DAY_LABEL[nx])}</span>` : ''}
+    </div>${hist ? `<p class="small muted" style="margin:6px 0 0">Recent: ${hist}</p>` : ''}` : '';
+  renderMyWorkouts();
+  // Don't redraw while you're typing a weight or name, or the keyboard would close
+  const ae = document.activeElement;
+  if (box.contains(ae) && ['INPUT', 'SELECT', 'TEXTAREA'].includes(ae.tagName)) return;
+  if (!pl) {
+    planEdit = false;
+    box.innerHTML = `<h2 class="t-info">Your plan<button class="info-btn" type="button" data-info="planView" aria-label="How this works">i</button></h2><div class="empty">No plan for ${S.date === todayKey() ? 'today' : 'this day'} yet. Build one with AI, start one of your workouts, or create your own.</div>
+      <button id="newBlank" class="primary">Create a workout</button>`;
+    $('#newBlank').onclick = startBlank;
+    return;
+  }
+  if (planEdit) { renderPlanEditor(pl, box); return; }
+  const prog = planProgress(pl), vol = planVolume(pl);
+  const minutes = pl.minutes || estMinutes(pl), kcal = pl.est_kcal || estKcal(minutes);
+  box.innerHTML = `<div class="card-head"><h2 class="t-info">${esc(pl.title || 'Workout')}<button class="info-btn" type="button" data-info="planView" aria-label="How this works">i</button></h2><button id="planEditBtn" class="ghost">Edit</button></div>
+    <div class="row" style="gap:6px">${pl.splitDay ? `<span class="chip accent">${esc(DAY_LABEL[pl.splitDay] || pl.splitDay)} day</span>` : ''}${pl.intensity ? `<span class="chip ${pl.intensity === 'high' ? 'ember' : pl.intensity === 'low' ? 'sky' : 'gold'}">${esc(pl.intensity)}</span>` : ''}${pl.templateId ? '<span class="chip sky">My workout</span>' : ''}<span class="small muted">${minutes} min${pl.focus ? ' · ' + esc(pl.focus) : ''} · ~${fmt(kcal)} kcal</span></div>
+    ${pl.why ? `<p style="margin:0">${esc(pl.why)}</p>` : ''}
+    <div><div class="bar"><i style="width:${prog.total ? prog.done / prog.total * 100 : 0}%;background:var(--accent)"></i></div>
+      <div class="small muted" style="margin-top:4px">${prog.done}/${prog.total} exercises done${vol.n ? ` · ${vol.n} sets · ${fmt(vol.v)} kg lifted` : ''}</div></div>
+    ${pl.blocks.map((bk, bi) => `<div class="plan-block"><div class="label">${esc(bk.name)}</div>
+      ${bk.exercises.map((x, ei) => exerciseCard(pl, x, bi, ei)).join('')}</div>`).join('')}
+    <button id="logPlan" class="primary" ${pl.logged ? 'disabled' : ''}>${pl.logged ? 'Logged as done' : `Finish and log ~${fmt(kcal)} kcal`}</button>
+    <button id="saveTpl" class="ghost">${pl.templateId && tplDoc().items.some(t => t.id === pl.templateId) ? 'Update my saved workout' : 'Save as my workout'}</button>`;
+  wirePlanView(pl);
+}
+
+/* ---------- workouts: per-set logging, memory, editing, templates ---------- */
+let planEdit = false, armedStart = null, armedDelete = null;
+const openHist = new Set();
+const exKey = n => String(n || '').toLowerCase().replace(/\(.*?\)/g, '').replace(/[^a-z0-9]+/g, ' ').trim();
+const fmtKg = w => String(Math.round((+w || 0) * 4) / 4);
+// "4 × 6–8, RIR 2" → { sets: 4, reps: "6–8", low: 6 }
+function parseDose(dose) {
+  const m = String(dose || '').match(/(\d+)\s*[×xX*]\s*(\d+)(?:\s*[–-]\s*(\d+))?/);
+  return m ? { sets: Math.min(10, Math.max(1, +m[1])), reps: m[3] ? `${m[2]}–${m[3]}` : m[2], low: +m[2] } : null;
+}
+// Every logged session of an exercise before a date, newest first: [{ k, sets: [{ w, r }] }]
+function exerciseHistory(name, beforeKey, limit = 6) {
+  const key = exKey(name), out = [];
+  if (!key) return out;
+  const days = Object.keys(docs).filter(id => id.startsWith('d-')).map(id => id.slice(2)).filter(k => k < beforeKey).sort().reverse();
+  for (const k of days) {
+    const pl = docs[dayId(k)]?.plan; if (!pl) continue;
+    for (const bk of pl.blocks || []) for (const x of bk.exercises || []) {
+      if (exKey(x.name) !== key || !Array.isArray(x.sets)) continue;
+      const done = x.sets.filter(s => s.done && +s.r > 0);
+      if (done.length) out.push({ k, sets: done.map(s => ({ w: +s.w || 0, r: +s.r })) });
+    }
+    if (out.length >= limit) break;
+  }
+  return out;
+}
+const e1rm = (w, r) => w * (1 + r / 30);   // estimated one-rep max (Epley)
+function bestOf(hist) {
+  let best = null;
+  hist.forEach(h => h.sets.forEach(s => { if (s.w > 0 && (!best || e1rm(s.w, s.r) > e1rm(best.w, best.r))) best = { ...s, k: h.k }; }));
+  return best;
+}
+const setsText = sets => sets.map(s => s.w ? `${fmtKg(s.w)}×${s.r}` : `${s.r} reps`).join(', ');
+// Starting rows for an exercise: weights from the AI suggestion or your last session, reps from the plan
+function initialSets(x, beforeKey) {
+  const d = parseDose(x.dose); if (!d) return null;
+  const last = exerciseHistory(x.name, beforeKey, 1)[0];
+  return Array.from({ length: d.sets }, (_, i) => {
+    const prev = last ? (last.sets[i] || last.sets[last.sets.length - 1]) : null;
+    return { w: +x.kg > 0 ? +x.kg : prev ? prev.w : '', r: d.low || (prev ? prev.r : ''), done: false };
+  });
+}
+function materialize(plan, k) {
+  plan.blocks.forEach(bk => bk.exercises.forEach(x => { if (!Array.isArray(x.sets)) { const s = initialSets(x, k); if (s) x.sets = s; } }));
+}
+function exDone(pl, bi, ei) {
+  const x = pl.blocks[bi].exercises[ei];
+  return Array.isArray(x.sets) && x.sets.length ? x.sets.every(s => s.done) : !!pl.done?.[`${bi}-${ei}`];
+}
+function planProgress(pl) {
+  let total = 0, done = 0;
+  (pl?.blocks || []).forEach((bk, bi) => bk.exercises.forEach((_, ei) => { total++; if (exDone(pl, bi, ei)) done++; }));
+  return { total, done };
+}
+function planVolume(pl) {
+  let v = 0, n = 0;
+  (pl?.blocks || []).forEach(bk => bk.exercises.forEach(x => (x.sets || []).forEach(s => { if (s.done) { n++; v += (+s.w || 0) * (+s.r || 0); } })));
+  return { v: Math.round(v), n };
+}
+function estMinutes(pl) {
+  let sets = 0; (pl?.blocks || []).forEach(bk => bk.exercises.forEach(x => { sets += (x.sets?.length || parseDose(x.dose)?.sets || 1); }));
+  return Math.max(10, Math.round(sets * 2.5 + 5));
+}
+const estKcal = minutes => Math.round(5 * weight() * (minutes / 60) * 0.9);
+// Saves while typing without redrawing the screen
+// Structural changes: release focus first so the screen is allowed to redraw
+const editDayNow = fn => { try { document.activeElement?.blur(); } catch {} editDay(fn); };
+let quietTimer;
+function editDayQuiet(fn) {
+  const id = dayId(S.date), d = structuredClone(getDay()); fn(d);
+  docs[id] = d; pending[id] = d;
+  clearTimeout(quietTimer); quietTimer = setTimeout(() => flush(id), 500);
+}
+
+function exerciseCard(pl, x, bi, ei) {
+  const k = `${bi}-${ei}`, done = exDone(pl, bi, ei);
+  const sets = Array.isArray(x.sets) ? x.sets : initialSets(x, S.date);
+  let memory = '';
+  if (sets) {
+    const hist = exerciseHistory(x.name, S.date, 6), last = hist[0], best = bestOf(hist), key = exKey(x.name);
+    const lastTxt = last ? `Last (${labelOf(last.k)}): ${setsText(last.sets)}${best ? ` · Best ${fmtKg(best.w)} kg × ${best.r}` : ''}` : 'First time logging this exercise';
+    memory = `<button class="mem" data-hist="${esc(key)}" ${hist.length ? '' : 'disabled'}>${esc(lastTxt)}${hist.length ? (openHist.has(key) ? ' ▴' : ' ▾') : ''}</button>
+      ${openHist.has(key) && hist.length ? `<div class="hist">${hist.map(h => `<div class="hist-row"><span>${esc(labelOf(h.k))}</span><span class="num">${esc(setsText(h.sets))}</span></div>`).join('')}
+        ${best ? `<div class="hist-row"><span>Est. 1-rep max</span><span class="num">${fmtKg(e1rm(best.w, best.r))} kg</span></div>` : ''}</div>` : ''}`;
+  }
+  return `<div class="ex2${done ? ' done' : ''}">
+    <div class="ex2-head"><div style="min-width:0"><div class="ex-name">${esc(x.name || 'Unnamed exercise')}</div>
+      <div class="ex-meta">${esc(x.dose)}${x.rest ? ' · rest ' + esc(x.rest) : ''}</div></div>
+      ${sets ? '' : `<input type="checkbox" class="simple-cb" data-simple="${k}" ${done ? 'checked' : ''} aria-label="Mark ${esc(x.name)} done">`}</div>
+    ${x.tip ? `<div class="ex-meta">${esc(x.tip)}</div>` : ''}
+    ${memory}
+    ${sets ? `<div class="sets"><div class="set-row set-head"><span>Set</span><span>kg</span><span>Reps</span><span></span></div>
+      ${sets.map((s, si) => `<div class="set-row${s.done ? ' is-done' : ''}"><span class="n">${si + 1}</span>
+        <input type="number" inputmode="decimal" step="0.5" min="0" data-w="${k}-${si}" value="${esc(s.w)}" aria-label="Set ${si + 1} weight in kg">
+        <input type="number" inputmode="numeric" min="0" data-r="${k}-${si}" value="${esc(s.r)}" aria-label="Set ${si + 1} reps">
+        <button class="tick" data-tick="${k}-${si}" aria-label="Set ${si + 1} ${s.done ? 'done, tap to undo' : 'mark done'}">✓</button></div>`).join('')}</div>
+      <div class="row" style="gap:6px"><button class="ghost sm" data-addset="${k}">+ Set</button>${sets.length > 1 ? `<button class="ghost sm" data-delset="${k}">− Set</button>` : ''}</div>`
+      : `<button class="ghost sm" data-addset="${k}">+ Track sets and weight</button>`}
+  </div>`;
+}
+
+function wirePlanView(pl) {
+  const box = $('#planView');
+  const idx = s => s.split('-').map(Number);
+  $('#planEditBtn').onclick = () => { planEdit = true; renderPlan(); };
+  box.querySelectorAll('[data-w],[data-r]').forEach(inp => inp.addEventListener('input', () => {
+    const isW = inp.hasAttribute('data-w'), [bi, ei, si] = idx(inp.dataset.w || inp.dataset.r);
+    editDayQuiet(d => { materialize(d.plan, d.date); const s = d.plan.blocks[bi].exercises[ei].sets?.[si]; if (s) s[isW ? 'w' : 'r'] = inp.value === '' ? '' : +inp.value; });
+  }));
+  box.querySelectorAll('[data-tick]').forEach(b => b.onclick = () => {
+    const [bi, ei, si] = idx(b.dataset.tick);
+    // Use whatever is typed in the row right now
+    const row = b.closest('.set-row'), w = row.querySelector('[data-w]').value, r = row.querySelector('[data-r]').value;
+    let nowDone = false, rest = '';
+    editDayNow(d => {
+      materialize(d.plan, d.date);
+      const x = d.plan.blocks[bi].exercises[ei], s = x.sets[si];
+      s.w = w === '' ? '' : +w; s.r = r === '' ? '' : +r; s.done = !s.done; nowDone = s.done; rest = x.rest;
+    });
+    if (nowDone) toast(`Set ${si + 1} done${rest ? ` · rest ${rest}` : ''}`);
+  });
+  box.querySelectorAll('[data-addset]').forEach(b => b.onclick = () => {
+    const [bi, ei] = idx(b.dataset.addset);
+    editDayNow(d => {
+      materialize(d.plan, d.date);
+      const x = d.plan.blocks[bi].exercises[ei];
+      if (!Array.isArray(x.sets)) x.sets = [];
+      const last = x.sets[x.sets.length - 1];
+      x.sets.push(last ? { w: last.w, r: last.r, done: false } : { w: +x.kg > 0 ? +x.kg : '', r: '', done: false });
+    });
+  });
+  box.querySelectorAll('[data-delset]').forEach(b => b.onclick = () => {
+    const [bi, ei] = idx(b.dataset.delset);
+    editDayNow(d => { materialize(d.plan, d.date); d.plan.blocks[bi].exercises[ei].sets.pop(); });
+  });
+  box.querySelectorAll('[data-simple]').forEach(cb => cb.onchange = () => editDayNow(d => { d.plan.done = { ...(d.plan.done || {}), [cb.dataset.simple]: cb.checked }; }));
+  box.querySelectorAll('[data-hist]').forEach(b => b.onclick = () => { const k = b.dataset.hist; openHist.has(k) ? openHist.delete(k) : openHist.add(k); renderPlan(); });
+  $('#saveTpl').onclick = () => saveAsTemplate(getDay().plan);
+  const lp = $('#logPlan');
+  if (lp && !pl.logged) lp.onclick = () => {
+    editDayNow(d => {
+      materialize(d.plan, d.date);
+      const vol = planVolume(d.plan), minutes = d.plan.minutes || estMinutes(d.plan);
+      d.plan.logged = true;
+      d.workouts = d.workouts.filter(w => w.id !== 'plan-' + d.date);
+      d.workouts.push({ id: 'plan-' + d.date, name: d.plan.title, type: ['push', 'pull', 'legs'].includes(d.plan.splitDay) ? d.plan.splitDay : 'plan',
+        splitDay: d.plan.splitDay || null, minutes, kcal: d.plan.est_kcal || estKcal(minutes),
+        detail: vol.n ? `${vol.n} sets · ${fmt(vol.v)} kg lifted` : (d.plan.focus || ''), at: new Date().toISOString() });
+    });
+    toast('Workout logged. Nice work.');
+  };
+}
+
+function renderPlanEditor(pl, box) {
+  const names = new Set();
+  Object.keys(docs).filter(id => id.startsWith('d-')).forEach(id => (docs[id].plan?.blocks || []).forEach(bk => bk.exercises.forEach(x => x.name && names.add(x.name))));
+  tplDoc().items.forEach(t => t.blocks.forEach(bk => bk.exercises.forEach(x => x.name && names.add(x.name))));
+  box.innerHTML = `<div class="card-head"><h2 class="t-info">Edit workout<button class="info-btn" type="button" data-info="planEditor" aria-label="How this works">i</button></h2><button id="planDone" class="primary">Done</button></div>
+    <div class="fields">
+      <label class="field" style="grid-column:1/-1"><span>Title</span><input id="edTitle" value="${esc(pl.title || '')}" placeholder="e.g. Push day A"></label>
+      <label class="field"><span>Day type</span><select id="edSplit"><option value="">None</option>${Object.entries(DAY_LABEL).map(([k, v]) => `<option value="${k}" ${pl.splitDay === k ? 'selected' : ''}>${esc(v)}</option>`).join('')}</select></label>
+    </div>
+    ${pl.blocks.map((bk, bi) => `<div class="plan-block">
+      <div class="row" style="gap:6px"><input class="grow" data-bname="${bi}" value="${esc(bk.name)}" aria-label="Section name"><button class="ghost sm" data-delblock="${bi}">Remove section</button></div>
+      ${bk.exercises.map((x, ei) => `<div class="ex-edit">
+        <input data-ename="${bi}-${ei}" value="${esc(x.name)}" placeholder="Exercise name" list="exNames" aria-label="Exercise name">
+        <div class="row" style="gap:6px;flex-wrap:nowrap"><input data-edose="${bi}-${ei}" value="${esc(x.dose)}" placeholder="Sets × reps, e.g. 3 × 10" aria-label="Sets and reps" style="flex:2">
+          <input data-erest="${bi}-${ei}" value="${esc(x.rest || '')}" placeholder="Rest" aria-label="Rest" style="flex:1"></div>
+        <div class="row" style="gap:6px"><button class="ghost sm" data-move="${bi}-${ei}-up" ${ei === 0 ? 'disabled' : ''}>↑</button><button class="ghost sm" data-move="${bi}-${ei}-down" ${ei === bk.exercises.length - 1 ? 'disabled' : ''}>↓</button><button class="ghost sm" data-delex="${bi}-${ei}">Remove</button></div>
+      </div>`).join('')}
+      <button class="ghost sm" data-addex="${bi}">+ Add exercise</button>
+    </div>`).join('')}
+    <button id="addBlock" class="ghost">+ Add section</button>
+    <datalist id="exNames">${[...names].sort().map(n => `<option value="${esc(n)}">`).join('')}</datalist>
+    <details class="howto"><summary>How to write sets × reps</summary><p class="small muted" style="margin:6px 0 0">Write "4 × 8" or "3 × 8–12" to get weight and rep rows for each set. Anything else, like "45 s" or "10 per side", becomes a simple tick-off item. Exercise names suggest ones you've done before, so your history carries over.</p></details>`;
+  const idx = s => s.split('-').map(Number);
+  const resetSetsIfUnstarted = x => { if (Array.isArray(x.sets) && !x.sets.some(s => s.done)) delete x.sets; };
+  $('#planDone').onclick = () => { planEdit = false; editDayNow(d => { d.plan.blocks.forEach(bk => { bk.exercises = bk.exercises.filter(x => x.name.trim()); }); d.plan.blocks = d.plan.blocks.filter(bk => bk.exercises.length); if (!d.plan.blocks.length) d.plan.blocks = [{ name: 'Main', exercises: [] }]; }); };
+  $('#edTitle').addEventListener('input', e => editDayQuiet(d => { d.plan.title = e.target.value.slice(0, 80); }));
+  $('#edSplit').onchange = e => editDayNow(d => { d.plan.splitDay = e.target.value || null; });
+  box.querySelectorAll('[data-bname]').forEach(inp => inp.addEventListener('input', () => editDayQuiet(d => { d.plan.blocks[+inp.dataset.bname].name = inp.value.slice(0, 40); })));
+  box.querySelectorAll('[data-ename]').forEach(inp => inp.addEventListener('input', () => { const [bi, ei] = idx(inp.dataset.ename); editDayQuiet(d => { const x = d.plan.blocks[bi].exercises[ei]; x.name = inp.value.slice(0, 80); x.kg = 0; resetSetsIfUnstarted(x); }); }));
+  box.querySelectorAll('[data-edose]').forEach(inp => inp.addEventListener('input', () => { const [bi, ei] = idx(inp.dataset.edose); editDayQuiet(d => { const x = d.plan.blocks[bi].exercises[ei]; x.dose = inp.value.slice(0, 40); resetSetsIfUnstarted(x); }); }));
+  box.querySelectorAll('[data-erest]').forEach(inp => inp.addEventListener('input', () => { const [bi, ei] = idx(inp.dataset.erest); editDayQuiet(d => { d.plan.blocks[bi].exercises[ei].rest = inp.value.slice(0, 20); }); }));
+  box.querySelectorAll('[data-move]').forEach(b => b.onclick = () => { const [bi, ei, dir] = b.dataset.move.split('-'); const i = +ei, j = dir === 'up' ? i - 1 : i + 1; editDayNow(d => { const ex = d.plan.blocks[+bi].exercises; [ex[i], ex[j]] = [ex[j], ex[i]]; }); });
+  box.querySelectorAll('[data-delex]').forEach(b => b.onclick = () => { const [bi, ei] = idx(b.dataset.delex); editDayNow(d => { d.plan.blocks[bi].exercises.splice(ei, 1); }); });
+  box.querySelectorAll('[data-addex]').forEach(b => b.onclick = () => { const bi = +b.dataset.addex; editDayNow(d => { d.plan.blocks[bi].exercises.push({ name: '', dose: '3 × 10', rest: '90 s', tip: '' }); }); setTimeout(() => { const all = box.querySelectorAll(`[data-ename^="${bi}-"]`); all[all.length - 1]?.focus(); }, 50); });
+  box.querySelectorAll('[data-delblock]').forEach(b => b.onclick = () => { const bi = +b.dataset.delblock; editDayNow(d => { d.plan.blocks.splice(bi, 1); }); });
+  $('#addBlock').onclick = () => editDayNow(d => { d.plan.blocks.push({ name: 'New section', exercises: [{ name: '', dose: '3 × 10', rest: '90 s', tip: '' }] }); });
+}
+
+/* My workouts (saved templates) */
+const tplDoc = () => docs.templates || { items: [] };
+function saveAsTemplate(pl) {
+  if (!pl) return;
+  const t = structuredClone(tplDoc());
+  const blocks = pl.blocks.map(bk => ({ name: bk.name, exercises: bk.exercises.filter(x => x.name).map(x => {
+    const d = parseDose(x.dose), n = Array.isArray(x.sets) ? x.sets.length : 0;
+    return { name: x.name, dose: d && n ? `${n} × ${d.reps}` : x.dose, rest: x.rest || '', tip: x.tip || '' };
+  }) })).filter(bk => bk.exercises.length);
+  const existing = pl.templateId && t.items.find(i => i.id === pl.templateId);
+  if (existing) {
+    Object.assign(existing, { title: pl.title || 'My workout', splitDay: pl.splitDay || null, blocks, updated: Date.now() });
+    save('templates', t); toast('Saved workout updated');
+  } else {
+    const id = uid();
+    t.items.unshift({ id, title: pl.title || 'My workout', splitDay: pl.splitDay || null, blocks, created: Date.now() });
+    save('templates', t);
+    editDayNow(d => { if (d.plan) d.plan.templateId = id; });
+    toast('Saved to My workouts');
+  }
+}
+function newPlanFrom(title, splitDay, blocks, templateId) {
+  return { title, focus: '', minutes: 0, splitDay: splitDay || null, intensity: '', why: '', est_kcal: 0,
+    blocks: structuredClone(blocks), done: {}, logged: false, templateId: templateId || null, made: new Date().toISOString() };
+}
+function startTemplate(t) {
+  editDayNow(d => { d.plan = newPlanFrom(t.title, t.splitDay, t.blocks, t.id); });
+  planEdit = false; toast(`${t.title} started`);
+  $('#planView').scrollIntoView({ block: 'start', behavior: 'smooth' });
+}
+function startBlank() {
+  const go = () => { planEdit = true; editDayNow(d => { d.plan = newPlanFrom('', null, [{ name: 'Main', exercises: [{ name: '', dose: '3 × 10', rest: '90 s', tip: '' }] }], null); }); $('#planView').scrollIntoView({ block: 'start', behavior: 'smooth' }); };
+  const cur = getDay().plan;
+  if (cur && planProgress(cur).done > 0 && armedStart !== 'blank') { armedStart = 'blank'; renderMyWorkouts(); setTimeout(() => { armedStart = null; renderMyWorkouts(); }, 4000); toast('Tap again to replace today’s plan'); return; }
+  armedStart = null; go();
+}
+function renderMyWorkouts() {
+  const box = $('#myWorkouts'); if (!box) return;
+  const items = tplDoc().items, cur = getDay().plan, busy = cur && planProgress(cur).done > 0 && !cur.logged;
+  box.innerHTML = `<div class="card-head"><h2 class="t-info">My workouts<button class="info-btn" type="button" data-info="myWorkouts" aria-label="How this works">i</button></h2><button id="mwNew" class="ghost">${armedStart === 'blank' ? 'Tap again to replace' : '+ Create'}</button></div>
+    ${items.length ? `<div class="list">${items.map(t => {
+      const n = t.blocks.reduce((s, bk) => s + bk.exercises.length, 0), lastDone = lastTemplateUse(t.id);
+      return `<div class="item" style="grid-template-columns:1fr auto">
+        <div style="min-width:0"><div class="name">${esc(t.title)}</div><div class="sub">${t.splitDay ? esc(DAY_LABEL[t.splitDay] || t.splitDay) + ' day · ' : ''}${n} exercises${lastDone ? ' · last done ' + esc(labelOf(lastDone)) : ''}</div></div>
+        <div class="row" style="gap:6px;flex-wrap:nowrap"><button class="primary sm" data-start="${t.id}">${armedStart === t.id ? 'Tap again' : 'Start'}</button><button class="ghost sm" data-deltpl="${t.id}" aria-label="Delete ${esc(t.title)}">${armedDelete === t.id ? 'Delete?' : '✕'}</button></div></div>`; }).join('')}</div>`
+      : `<div class="empty">Save any plan with "Save as my workout", or tap + Create to build your own.</div>`}
+    ${busy ? '<p class="small muted" style="margin:0">Starting a workout replaces today’s plan, so you’ll be asked to tap twice.</p>' : ''}`;
+  $('#mwNew').onclick = startBlank;
+  box.querySelectorAll('[data-start]').forEach(b => b.onclick = () => {
+    const t = items.find(i => i.id === b.dataset.start); if (!t) return;
+    if (busy && armedStart !== t.id) { armedStart = t.id; renderMyWorkouts(); setTimeout(() => { if (armedStart === t.id) { armedStart = null; renderMyWorkouts(); } }, 4000); return; }
+    armedStart = null; startTemplate(t);
+  });
+  box.querySelectorAll('[data-deltpl]').forEach(b => b.onclick = () => {
+    const id = b.dataset.deltpl;
+    if (armedDelete !== id) { armedDelete = id; renderMyWorkouts(); setTimeout(() => { if (armedDelete === id) { armedDelete = null; renderMyWorkouts(); } }, 4000); return; }
+    armedDelete = null;
+    const t = structuredClone(tplDoc()); t.items = t.items.filter(i => i.id !== id); save('templates', t); toast('Workout deleted');
+  });
+}
+function lastTemplateUse(id) {
+  const days = Object.keys(docs).filter(k => k.startsWith('d-') && docs[k].plan?.templateId === id && planProgress(docs[k].plan).done > 0).map(k => k.slice(2)).sort();
+  return days[days.length - 1] || null;
+}
+// Recent lifts, given to the AI so it can pick and progress weights
+function liftMemoryForPrompt() {
+  const seen = new Map();
+  const days = Object.keys(docs).filter(id => id.startsWith('d-')).map(id => id.slice(2)).filter(k => k < S.date && k >= shift(S.date, -21)).sort().reverse();
+  for (const k of days) for (const bk of docs[dayId(k)].plan?.blocks || []) for (const x of bk.exercises || []) {
+    const key = exKey(x.name); if (!key || seen.has(key) || !Array.isArray(x.sets)) continue;
+    const done = x.sets.filter(s => s.done && +s.r > 0); if (!done.length) continue;
+    seen.set(key, `- ${x.name} (${k}, planned ${x.dose}): ${setsText(done.map(s => ({ w: +s.w || 0, r: +s.r })))}`);
+  }
+  const lines = [...seen.values()].slice(0, 15);
+  return lines.length ? `Their recent lifts (kg × reps per completed set):\n${lines.join('\n')}` : 'They have no logged lifts yet.';
+}
+
+function renderTargets() {
+  const t = targets();
+  const p = profile() || {};
+  const GOAL_TXT = { lose: 'Lose fat', recomp: 'Lose fat, keep muscle', maintain: 'Maintain', gain: 'Build muscle' };
+  let body = '';
+  if (t.setup) {
+    const w = +p.weightKg, hM = +p.heightCm / 100, bmi = w / (hM * hM);
+    const bmiCat = bmi < 18.5 ? ['Underweight', 'sky'] : bmi < 25 ? ['Healthy range', 'accent'] : bmi < 30 ? ['Overweight', 'gold'] : ['Obese range', 'ember'];
+    const water = Math.round(w * 35 / 100) / 10;
+    const gw = +p.goalWeightKg, pace = +p.pace || 0.5;
+    let eta = '';
+    if (gw && Math.abs(gw - w) >= 0.5 && ((p.goal === 'lose' || p.goal === 'recomp') ? gw < w : p.goal === 'gain' ? gw > w : false)) {
+      const weeks = Math.ceil(Math.abs(w - gw) / (p.goal === 'recomp' ? 0.2 : pace));
+      const when = new Date(); when.setDate(when.getDate() + weeks * 7);
+      eta = `<div class="item" style="grid-template-columns:1fr auto"><div><div class="name">Reach ${fmt(gw)} kg</div><div class="sub">${Math.abs(w - gw).toFixed(1)} kg to go at ${p.goal === 'recomp' ? '~0.2' : pace} kg/week</div></div><div class="k">${when.toLocaleDateString(undefined, { month: 'short', year: 'numeric' })}</div></div>`;
+    }
+    const sp = SPLITS[p.split || 'ppl'] || SPLITS.ppl;
+    const adjTxt = t.adj < 0 ? `${fmt(-t.adj)} kcal below maintenance` : t.adj > 0 ? `${fmt(t.adj)} kcal above maintenance` : 'at maintenance';
+    body = `
+    <div class="stats">
+      <div class="stat"><div class="label">BMI</div><div class="v">${bmi.toFixed(1)}</div><span class="chip ${bmiCat[1]}">${bmiCat[0]}</span></div>
+      <div class="stat"><div class="label">Resting burn (BMR)</div><div class="v">${fmt(t.bmr)}</div><div class="small muted">kcal/day at complete rest</div></div>
+      <div class="stat"><div class="label">Maintenance</div><div class="v">${fmt(t.tdee)}</div><div class="small muted">kcal/day with your daily life</div></div>
+      <div class="stat"><div class="label">Daily target</div><div class="v" style="color:var(--ember)">${fmt(t.kcal)}</div><div class="small muted">${adjTxt}</div></div>
+    </div>
+    <div class="list">
+      <div class="item" style="grid-template-columns:1fr auto"><div><div class="name">Protein</div><div class="sub">${t.perKg} g per kg body weight, spread over 3–4 meals</div></div><div class="k">${fmt(t.protein)} g</div></div>
+      <div class="item" style="grid-template-columns:1fr auto"><div><div class="name">Carbs · Fat</div><div class="sub">Fat ≈ 28% of calories, carbs fill the rest</div></div><div class="k">${fmt(t.carbs)} · ${fmt(t.fat)} g</div></div>
+      <div class="item" style="grid-template-columns:1fr auto"><div><div class="name">Water</div><div class="sub">About 35 ml per kg, more on training days</div></div><div class="k">${water} L</div></div>
+      <div class="item" style="grid-template-columns:1fr auto"><div><div class="name">Steps</div><div class="sub">Steps above 2,000 add calories to your budget</div></div><div class="k">${fmt(t.steps)}</div></div>
+      ${eta}
+      <div class="item" style="grid-template-columns:1fr auto"><div><div class="name">Training</div><div class="sub">${esc(sp.name)} · ${esc(p.days || 4)} days/week · ${esc(p.sessionMin || 45)} min · ${esc(cap(p.experience || 'beginner'))}${p.equipment ? ' · ' + esc(p.equipment) : ''}</div></div><div class="k">${nextSplitDay() ? esc(DAY_LABEL[nextSplitDay()]) + ' next' : ''}</div></div>
+      ${p.injuries ? `<div class="item" style="grid-template-columns:1fr"><div><div class="name">Working around</div><div class="sub">${esc(p.injuries)}</div></div></div>` : ''}
+      ${(p.diet && p.diet !== 'none') || p.cuisine || p.avoid ? `<div class="item" style="grid-template-columns:1fr"><div><div class="name">Food</div><div class="sub">${[p.diet && p.diet !== 'none' ? cap(p.diet) : '', p.cuisine || '', p.avoid ? 'avoids ' + p.avoid : ''].filter(Boolean).map(esc).join(' · ')}</div></div></div>` : ''}
+    </div>
+    `;
+  } else {
+    body = `<div class="notice">Fill in age, height and weight below to get your own numbers. Until then the app uses 2,000 kcal and 8,000 steps.</div>`;
+  }
+  $('#targetsView').innerHTML = `<div class="card-head"><h2 class="t-info">${p.name ? esc(p.name) + '’s plan' : 'Your plan'}<button class="info-btn" type="button" data-info="yourPlan" aria-label="How this works">i</button></h2>${t.setup ? `<span class="chip accent">${esc(GOAL_TXT[p.goal] || 'Maintain')}</span>` : ''}</div>
+    ${body}
+    `;
+}
+
+function render() {
+  $('#dateLabel').textContent = labelOf(S.date);
+  $('#nextDay').disabled = S.date >= todayKey();
+  if (!S.loaded) {
+    ['#todayHero', '#todaySteps', '#todayPlan', '#todayMeals', '#trend', '#mealList', '#woList', '#planView', '#targetsView'].forEach(s => { $(s).innerHTML = thinking(S.slow ? 'Still trying to reach your saved log…' : 'Loading your log…'); });
+    $('#stepsView').innerHTML = '';
+    return;
+  }
+  renderToday(); renderFood(); renderMove(); renderPlan(); renderTargets();
+}
+
+/* ---------- tabs & date ---------- */
+const TABS = ['today', 'food', 'move', 'plan', 'music', 'profile'];
+function route() {
+  const h = location.hash.replace('#', '');
+  S.tab = TABS.includes(h) ? h : 'today';
+  TABS.forEach(t => { $('#v-' + t).hidden = t !== S.tab; });
+  $$('nav a').forEach(a => a.getAttribute('href') === '#' + S.tab ? a.setAttribute('aria-current', 'page') : a.removeAttribute('aria-current'));
+  window.scrollTo(0, 0);
+}
+window.addEventListener('hashchange', route);
+function setDate(k) { S.date = k; $('#stepsInput').value = ''; foodDraft = null; renderFoodReview(); woDraft = null; renderWoReview(); render(); syncSteps(false); }
+$('#prevDay').onclick = () => setDate(shift(S.date, -1));
+$('#nextDay').onclick = () => { if (S.date < todayKey()) setDate(shift(S.date, 1)); };
+
+/* ---------- food inputs ---------- */
+function setMode(m) {
+  $('#modePhoto').setAttribute('aria-pressed', m === 'photo'); $('#modeText').setAttribute('aria-pressed', m === 'text');
+  $('#photoPane').hidden = m !== 'photo'; $('#textPane').hidden = m !== 'text';
+}
+$('#modePhoto').onclick = () => setMode('photo');
+$('#modeText').onclick = () => setMode('text');
+let photoFile = null, photoURL = null;
+function clearPhoto() { photoFile = null; if (photoURL) URL.revokeObjectURL(photoURL); photoURL = null; $('#photoPreview').hidden = true; $('#analyzePhoto').disabled = true; $('#photoNote').value = ''; $('#camInput').value = ''; $('#fileInput').value = ''; }
+function pickPhoto(e) {
+  const f = e.target.files?.[0]; if (!f) return;
+  if (photoURL) URL.revokeObjectURL(photoURL);
+  photoFile = f; photoURL = URL.createObjectURL(f);
+  const img = $('#photoPreview'); img.src = photoURL; img.hidden = false;
+  $('#analyzePhoto').disabled = !sample || aiBlocked;
+  $('#foodStatus').innerHTML = '';
+}
+$('#camInput').onchange = pickPhoto; $('#fileInput').onchange = pickPhoto;
+$('#analyzePhoto').onclick = () => analyzeFood('photo');
+$('#analyzeText').onclick = () => analyzeFood('text');
+const h = new Date().getHours();
+$('#mealType').value = h < 11 ? 'breakfast' : h < 15 ? 'lunch' : h < 18 ? 'snack' : 'dinner';
+$('#addManualFood').onclick = () => {
+  const name = $('#mName').value.trim(), kcal = Math.round(+$('#mKcal').value || 0);
+  if (!name || !kcal) { toast('Enter a food name and its calories.'); return; }
+  const val = id => $(id).value.trim() === '' ? null : Math.max(0, Math.round(+$(id).value || 0));
+  const p = val('#mP'), c = val('#mC'), f = val('#mF');
+  const complete = p !== null && c !== null && f !== null;
+  const id = uid(), dateKey = S.date;
+  editDay(d => d.meals.push({ id, meal: $('#mealType').value, name, portion: '', kcal, p: p || 0, c: c || 0, f: f || 0,
+    src: 'manual', macrosChecked: complete, macrosPending: !complete && !!sample, at: new Date().toISOString() }));
+  ['#mName', '#mKcal', '#mP', '#mC', '#mF'].forEach(s => { $(s).value = ''; });
+  if (complete || !sample) { toast('Food added'); return; }
+  toast('Food added · estimating carbs and fat…');
+  fillMacros(dateKey, [id], true).then(ok => toast(ok ? `Macros added for ${name}` : `Couldn’t estimate macros for ${name}. Use "Fill in" on the list to retry.`));
+};
+
+/* ---------- move inputs ---------- */
+$('#saveSteps').onclick = () => {
+  const v = Math.round(+$('#stepsInput').value);
+  if (!(v >= 0) || $('#stepsInput').value === '') { toast('Enter your step count.'); return; }
+  editDay(d => { d.steps = v; }); $('#stepsInput').value = ''; toast('Steps saved');
+};
+$$('.addSteps').forEach(b => b.onclick = () => editDay(d => { d.steps = (+d.steps || 0) + +b.dataset.n; }));
+$('#woAI').onclick = analyzeWorkout;
+$('#addManualWo').onclick = () => {
+  const type = $('#wType').value, min = Math.round(+$('#wMin').value || 0);
+  if (!min) { toast('Enter how many minutes.'); return; }
+  const kcal = Math.round(MET[type] * +$('#wEffort').value * weight() * (min / 60) * 0.9);
+  editDay(d => d.workouts.push({ id: uid(), name: $('#wName').value.trim() || TYPE_LABEL[type], type, minutes: min, kcal, detail: '', at: new Date().toISOString() }));
+  $('#wMin').value = ''; $('#wName').value = ''; toast(`Logged ~${kcal} kcal`);
+};
+$('#buildPlan').onclick = buildPlan;
+
+/* ---------- profile ---------- */
+const PF = { fName: 'name', fSex: 'sex', fAge: 'age', fH: 'heightCm', fW: 'weightKg', fGoalW: 'goalWeightKg', fPace: 'pace', fAct: 'activity', fGoal: 'goal', fSteps: 'stepGoal',
+  fExp: 'experience', fSplit: 'split', fDays: 'days', fSess: 'sessionMin', fEquip: 'equipment', fInj: 'injuries', fDiet: 'diet', fCuisine: 'cuisine', fAvoid: 'avoid' };
+const PF_NUM = ['age', 'heightCm', 'weightKg', 'goalWeightKg', 'pace', 'activity', 'stepGoal', 'days', 'sessionMin'];
+function fillProfileForm() {
+  const p = profile() || {};
+  Object.entries(PF).forEach(([id, k]) => { const el = $('#' + id); if (el && p[k] != null && p[k] !== '') el.value = String(p[k]); });
+  if (!p.stepGoal) $('#fSteps').value = 8000;
+  if (p.sessionMin && [...$('#pTime').options].some(o => o.value == p.sessionMin)) $('#pTime').value = String(p.sessionMin);
+}
+$('#saveProfile').onclick = () => {
+  const p = {};
+  Object.entries(PF).forEach(([id, k]) => { const v = $('#' + id).value.trim(); p[k] = PF_NUM.includes(k) ? (v === '' ? null : +v) : v.slice(0, 120); });
+  save('profile', p); fillProfileForm(); toast('Profile saved'); window.scrollTo(0, 0);
+};
+
+/* ---------- helpers ---------- */
+function setBusy(sels, on) { sels.forEach(s => { const el = $(s); if (el) el.disabled = on || !sample || aiBlocked; }); }
+let toastT;
+function toast(msg) {
+  let el = $('.toast'); if (!el) { el = document.createElement('div'); el.className = 'toast'; el.setAttribute('role', 'status'); document.body.append(el); }
+  el.textContent = msg; el.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => { el.hidden = true; }, 2400);
+}
+function applyAiAvailability() {
+  const hadAi = !!sample;
+  sample = hasKey() ? nimShim : null;
+  if (hadAi !== !!sample && S.loaded) setTimeout(render, 0);
+  const ok = !!sample && !aiBlocked;
+  $('#aiMissingFood').hidden = ok; $('#aiMissingPlan').hidden = ok;
+  ['#analyzeText', '#woAI', '#buildPlan'].forEach(s => { $(s).disabled = !ok; });
+  $('#analyzePhoto').disabled = !ok || !photoFile;
+  if (ok && !aiImages) { setMode('text'); $('#modePhoto').hidden = true; }
+}
+
+/* ---------- native bridge (Android app) ---------- */
+const NATIVE = window.Android || null;
+const nativeWaiting = {};
+window.__native = (id, ok, payload) => {
+  const p = nativeWaiting[id]; if (!p) return; delete nativeWaiting[id];
+  ok ? p.res(payload) : p.rej({ code: payload });
+};
+const callNative = (fn, ...args) => new Promise((res, rej) => {
+  if (!NATIVE) { rej({ code: 'unavailable' }); return; }
+  const id = uid(); nativeWaiting[id] = { res, rej };
+  try { NATIVE[fn](id, ...args); } catch (e) { delete nativeWaiting[id]; rej({ code: 'unavailable' }); }
+});
+const hasKey = () => { try { return !!NATIVE && NATIVE.hasApiKey(); } catch { return false; } };
+
+function parseJSONReply(text) {
+  const t = String(text || '').trim();
+  try { return JSON.parse(t); } catch {}
+  const fence = t.match(/```(?:json)?\s*([\s\S]*?)```/);
+  if (fence) { try { return JSON.parse(fence[1]); } catch {} }
+  const a = t.indexOf('{'), b = t.lastIndexOf('}');
+  if (a >= 0 && b > a) { try { return JSON.parse(t.slice(a, b + 1)); } catch {} }
+  throw { code: 'invalid_json' };
+}
+// NVIDIA's hosted API is happiest with small inline images, so shrink until the base64 is under ~170 KB
+async function imageToJpegBase64(file) {
+  const bmp = await createImageBitmap(file, { imageOrientation: 'from-image' });
+  let side = 1024, q = 0.8, out = '';
+  for (let i = 0; i < 6; i++) {
+    const scale = Math.min(1, side / Math.max(bmp.width, bmp.height));
+    const c = document.createElement('canvas');
+    c.width = Math.round(bmp.width * scale); c.height = Math.round(bmp.height * scale);
+    c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height);
+    out = c.toDataURL('image/jpeg', q).split(',')[1];
+    if (out.length < 170000) break;
+    side = Math.round(side * 0.8); q = Math.max(0.5, q - 0.08);
+  }
+  return out;
+}
+// Same call shape the page already uses: sample.json(prompt, {images, modelTier})
+const nimShim = {
+  async json(prompt, opts = {}) {
+    if (!hasKey()) throw { code: 'no_key' };
+    let img = '';
+    if (opts.images && opts.images.length) {
+      try { img = await imageToJpegBase64(opts.images[0]); } catch { throw { code: 'image_rejected' }; }
+    }
+    const strict = prompt + '\n\nReturn only the JSON object. No explanation before or after it.';
+    const started = Date.now();
+    aiStage = 'queued';
+    const tick = () => {
+      const s = Math.round((Date.now() - started) / 1000);
+      const t = s < 60 ? `${s} s` : `${Math.floor(s / 60)} min ${String(s % 60).padStart(2, '0')} s`;
+      const label = STAGE_TEXT[aiStage] || STAGE_TEXT.queued;
+      $$('.ai-progress').forEach(el => { el.textContent = `${label} · ${t}`; });
+    };
+    tick();
+    const timer = setInterval(tick, 1000);
+    try {
+      const text = await callNative('ask', strict, img, opts.modelTier === 'complex' ? 'high' : 'none');
+      return parseJSONReply(text);
+    } finally { clearInterval(timer); }
+  }
+};
+// Live status while NVIDIA works on a request
+let aiStage = 'queued';
+const STAGE_TEXT = {
+  queued: 'Waiting for NVIDIA (busy times can take a few minutes)',
+  thinking: 'Nemotron is thinking',
+  writing: 'Writing the answer'
+};
+window.__nativeProgress = (id, stage) => { aiStage = stage; };
+
+/* ---------- speech → description (phone's voice typing) ---------- */
+function setVoiceHints(text) { $$('.voiceHint').forEach(p => { p.textContent = text; p.hidden = !text; }); }
+function setupVoice() {
+  if (!NATIVE) return;
+  setVoiceHints('');
+  [['#foodMic', '#foodText', () => analyzeFood('text')], ['#woMic', '#woText', () => analyzeWorkout()]].forEach(([b, ta, run]) => {
+    const btn = $(b); btn.hidden = false;
+    btn.onclick = async () => {
+      btn.setAttribute('aria-pressed', 'true'); btn.querySelector('.micLabel').textContent = 'Listening…';
+      try {
+        const text = (await callNative('voice')).trim();
+        if (text) {
+          const el = $(ta); el.value = el.value.trim() ? el.value.trim() + ', ' + text : text;
+          if (hasKey()) run();
+        }
+      } catch (e) { if (e?.code === 'no_voice') toast('Voice input is not available on this phone. Use the keyboard microphone instead.'); }
+      finally { btn.setAttribute('aria-pressed', 'false'); btn.querySelector('.micLabel').textContent = 'Speak'; }
+    };
+  });
+}
+
+/* ---------- Samsung Health steps via Health Connect ---------- */
+let health = 'off'; // off | unavailable | needs_install | needs_permission | connected
+function healthStatusText() {
+  if (health === 'connected') return `<div class="row" style="justify-content:space-between"><span class="chip accent">Synced via Health Connect</span><button id="hcSync" class="ghost">Sync now</button></div>
+    <details class="howto" id="hcDropdown" ${hcOpen ? 'open' : ''}>
+      <summary id="hcSummary">Step details</summary>
+      <div style="display:grid;gap:10px">
+        <div id="hcDetail" style="display:grid;gap:10px"></div>
+        <div>
+          <h3 style="font-size:.88rem;margin:4px 0 6px">Steps don't match Samsung Health?</h3>
+          <ol class="small muted" style="margin:0;padding-left:18px;display:grid;gap:6px">
+            <li>Samsung Health only sends steps to Health Connect every so often. Tap <b>Open Samsung Health</b>, wait a few seconds, come back and tap <b>Sync now</b>.</li>
+            <li>In Samsung Health: <b>⋮ → Settings → Health Connect</b>, and make sure <b>Steps</b> is switched on.</li>
+            <li>If several sources write steps (this phone, a watch, Google Fit), Health Connect counts the one highest in its list. Tap <b>Data sources</b>, open <b>Activity → Steps</b>, and drag your preferred source to the top.</li>
+          </ol>
+        </div>
+        <div class="row"><button id="hcOpenSH" class="ghost sm">Open Samsung Health</button><button id="hcOpenHC" class="ghost sm">Data sources</button></div>
+      </div>
+    </details>`;
+  if (health === 'needs_permission') return `<p class="small muted" style="margin:0">Fill steps automatically from Samsung Health. In Samsung Health, turn on Settings → Health Connect, then allow access here.</p>
+    <button id="hcConnect" class="primary">Connect Samsung Health</button>`;
+  if (health === 'needs_install') return `<p class="small muted" style="margin:0">To read your Samsung Health steps, this phone needs the Health Connect app.</p>
+    <button id="hcInstall" class="primary">Get Health Connect</button>`;
+  if (health === 'unavailable') return `<p class="small muted" style="margin:0">Health Connect isn't available on this phone, so enter steps by hand.</p>`;
+  return '';
+}
+function renderHealth() {
+  const box = $('#healthBox'); if (!box) return;
+  box.innerHTML = healthStatusText();
+  const manual = health !== 'connected';
+  $('#stepsInput').parentElement.hidden = !manual;
+  $('.addSteps').parentElement.hidden = !manual;
+  const c = $('#hcConnect'), s = $('#hcSync'), i = $('#hcInstall');
+  if (c) c.onclick = async () => {
+    try {
+      const r = await callNative('healthConnect');
+      if (r === 'granted') { health = 'connected'; renderHealth(); syncSteps(true); }
+      else toast('Step access was not allowed. You can allow it in Settings → Health Connect.');
+    } catch { toast('Could not open Health Connect.'); }
+  };
+  if (s) s.onclick = () => syncSteps(true);
+  if (i) i.onclick = () => { try { NATIVE.openHealthConnectInstall(); } catch {} };
+  const sh = $('#hcOpenSH'), hc = $('#hcOpenHC');
+  if (sh) sh.onclick = () => { try { NATIVE.openSamsungHealth(); } catch {} };
+  if (hc) hc.onclick = () => { try { NATIVE.openHealthSettings(); } catch {} };
+  const dd = $('#hcDropdown'); if (dd) dd.addEventListener('toggle', () => { hcOpen = dd.open; });
+  renderHealthDetail();
+}
+// Which apps wrote steps for the selected day, and how fresh the data is
+let healthDetail = null, lastSyncAt = 0, hcOpen = false;
+// Friendly names for the apps that write steps into Health Connect
+function sourceName(s) {
+  const p = String(s.pkg || '');
+  if (p === SAMSUNG_PKG) return 'Samsung Health';
+  if (p.startsWith('com.android.healthconnect') || p.startsWith('com.google.android.healthconnect') || p === 'android') return 'This phone (step counter)';
+  if (p.startsWith('com.samsung.android.wear') || p.startsWith('com.samsung.android.watch') || p.includes('.wearable')) return 'Galaxy Watch';
+  if (p === 'com.google.android.apps.fitness') return 'Google Fit';
+  if (p.startsWith('com.fitbit')) return 'Fitbit';
+  if (s.app && s.app !== p) return s.app;
+  const last = p.split('.').pop() || 'Other app';
+  return last.length > 24 ? 'Other app' : last;
+}
+const SAMSUNG_PKG = 'com.sec.android.app.shealth';
+function agoText(ms) {
+  const m = Math.round((Date.now() - ms) / 60000);
+  if (m < 1) return 'just now';
+  if (m < 60) return `${m} min ago`;
+  const h = Math.floor(m / 60);
+  return h < 24 ? `${h} h ${m % 60} min ago` : new Date(ms).toLocaleString(undefined, { weekday: 'short', hour: 'numeric', minute: '2-digit' });
+}
+function renderHealthDetail() {
+  const box = $('#hcDetail'), sum = $('#hcSummary'); if (!box) return;
+  const d = healthDetail;
+  const checked = lastSyncAt ? `checked ${agoText(lastSyncAt)}` : 'checking…';
+  if (!d) { box.innerHTML = `<p class="small muted" style="margin:0">Step sources will show here after the next sync.</p>`; if (sum) sum.textContent = `Step details · ${checked}`; return; }
+  const srcs = d.sources || [];
+  const newest = srcs.reduce((m, s) => Math.max(m, +s.last || 0), 0);
+  let warn = '';
+  if (!srcs.length) warn = `No steps in Health Connect for ${labelOf(d.date).toLowerCase()} yet. Open Samsung Health so it shares them, then tap Sync now.`;
+  else if (d.date === todayKey() && Date.now() - newest > 3 * 3600 * 1000) warn = `The newest steps were recorded ${agoText(newest)}. Open Samsung Health to push newer ones, then tap Sync now.`;
+  const rows = srcs.map(s => `<div class="item" style="grid-template-columns:1fr auto;padding:8px 0"><div style="min-width:0"><div class="name small">${esc(sourceName(s))}</div><div class="sub">updated ${esc(agoText(s.last))}</div></div><div class="k small">${fmt(s.steps)}</div></div>`).join('');
+  box.innerHTML = `${warn ? `<div class="notice">${esc(warn)}</div>` : ''}
+    ${srcs.length ? `<div class="list" style="border:1px solid var(--line);border-radius:10px;padding:2px 12px;background:var(--surface)">${rows}
+      ${srcs.length > 1 ? `<div class="item" style="grid-template-columns:1fr auto;padding:8px 0"><div><div class="name small">Counted (duplicates removed)</div></div><div class="k small">${fmt(d.total)}</div></div>` : ''}</div>` : ''}
+    <p class="small muted" style="margin:0">Refreshes every 2 minutes while the app is open.</p>`;
+  if (sum) sum.textContent = `${warn ? '⚠ ' : ''}${srcs.length} source${srcs.length === 1 ? '' : 's'} · ${checked}`;
+}
+async function loadHealthDetail() {
+  if (health !== 'connected') return;
+  try {
+    const d = JSON.parse(await callNative('healthDetail', S.date));
+    healthDetail = { ...d, date: S.date };
+  } catch (e) { healthDetail = null; }
+  renderHealthDetail();
+}
+setInterval(() => { if (health === 'connected' && document.visibilityState === 'visible') syncSteps(false); }, 2 * 60 * 1000);
+let syncing = false;
+async function syncSteps(announce) {
+  if (health !== 'connected' || !S.loaded) return;
+  if (syncing) { if (announce) toast('Already syncing…'); return; }
+  syncing = true;
+  try { await syncStepsNow(announce); } finally { syncing = false; lastSyncAt = Date.now(); loadHealthDetail(); }
+}
+async function syncStepsNow(announce) {
+  const keys = [S.date];
+  for (let i = 0; i <= 6; i++) keys.push(shift(todayKey(), -i));
+  const seen = new Set(); let changed = 0;
+  for (const k of keys) {
+    if (seen.has(k) || k > todayKey()) continue; seen.add(k);
+    try {
+      const n = Math.round(+(await callNative('healthSteps', k)) || 0);
+      const d = getDay(k);
+      if (n !== (+d.steps || 0) && (n > 0 || d.steps)) {
+        const nd = structuredClone(d); nd.steps = n; nd.stepsSource = 'health'; save(dayId(k), nd); changed++;
+      }
+    } catch (e) {
+      if (e?.code === 'no_permission') { health = 'needs_permission'; renderHealth(); return; }
+    }
+  }
+  if (announce) toast(changed ? 'Steps synced from Samsung Health' : 'No new steps in Health Connect yet');
+}
+async function initHealth() {
+  if (!NATIVE) return;
+  let st = 'unavailable';
+  try { st = NATIVE.healthStatus(); } catch {}
+  if (st === 'available') {
+    try { await callNative('healthSteps', todayKey()); health = 'connected'; }
+    catch { health = 'needs_permission'; }
+  } else health = st;
+  renderHealth();
+  if (health === 'connected') syncSteps(false);
+}
+window.onAppResume = () => { if (health === 'connected') syncSteps(false); else if (health !== 'off') initHealth(); applyAiAvailability(); };
+
+/* ---------- Music: now playing, controls, Spotify playlists ---------- */
+const ICON = {
+  prev: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zM9.5 12 18 6v12z"/></svg>',
+  next: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 6h2v12h-2zM6 18V6l8.5 6z"/></svg>',
+  play: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>',
+  pause: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>',
+  note: '<svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg>'
+};
+let media = null, mediaAt = 0;
+const mmss = ms => { const s = Math.max(0, Math.floor(ms / 1000)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
+const livePos = () => !media ? 0 : Math.min(media.duration || Infinity, media.position + (media.playing ? Date.now() - mediaAt : 0));
+function mediaCmd(cmd, arg = '') {
+  try { NATIVE.mediaCommand(cmd, String(arg)); } catch {}
+  if (media && cmd === 'toggle') { media.position = livePos(); mediaAt = Date.now(); media.playing = !media.playing; renderMedia(); }
+}
+window.__mediaUpdate = json => { try { media = JSON.parse(json); mediaAt = Date.now(); } catch { return; } renderMedia(); };
+
+function renderMedia() {
+  const np = $('#nowPlaying'), mini = $('#miniPlayer');
+  if (!np) return;
+  if (!NATIVE) { np.innerHTML = '<h2>Now playing</h2><div class="empty">Music controls work in the Android app.</div>'; return; }
+  const has = media && media.title;
+  const art = has && media.art ? `<img class="np-art" src="${media.art}" alt="">` : `<div class="np-art">${ICON.note}</div>`;
+  const dur = media?.duration || 0, pos = livePos();
+  np.innerHTML = `<div class="card-head"><h2 class="t-info">Now playing<button class="info-btn" type="button" data-info="nowPlaying" aria-label="How this works">i</button></h2>${has ? `<span class="chip accent">${esc(media.app)}</span>` : ''}</div>
+    <div class="np">${art}<div style="min-width:0">
+      <div class="np-title">${has ? esc(media.title) : 'Nothing playing'}</div>
+      <div class="small muted">${has ? esc([media.artist, media.album].filter(Boolean).join(' · ')) : 'Start music in Spotify, or tap play to resume the last song.'}</div>
+    </div></div>
+    ${has && dur ? `<div><div class="bar np-bar" id="npBar"><i class="np-fill" style="width:${Math.min(100, pos / dur * 100)}%;background:var(--accent)"></i></div>
+      <div class="np-times"><span class="np-pos">${mmss(pos)}</span><span>${mmss(dur)}</span></div></div>` : ''}
+    <div class="np-controls">
+      <button id="npPrev" aria-label="Previous song">${ICON.prev}</button>
+      <button id="npToggle" class="big" aria-label="${media?.playing ? 'Pause' : 'Play'}">${media?.playing ? ICON.pause : ICON.play}</button>
+      <button id="npNext" aria-label="Next song">${ICON.next}</button>
+    </div>
+    ${media && !media.access ? `<div class="notice">Play, pause and skip already work. To also show the song, artwork and progress here, allow Lightweight Baby in <b>Notification access</b> (it only reads the music player).
+      <div class="row" style="margin-top:8px"><button id="npAccess" class="primary">Allow access</button></div></div>` : ''}`;
+  $('#npPrev').onclick = () => mediaCmd('prev');
+  $('#npNext').onclick = () => mediaCmd('next');
+  $('#npToggle').onclick = () => mediaCmd('toggle');
+  const acc = $('#npAccess'); if (acc) acc.onclick = () => { try { NATIVE.openMediaAccessSettings(); } catch {} };
+  const bar = $('#npBar');
+  if (bar) bar.onclick = ev => { const r = bar.getBoundingClientRect(); const ms = Math.round((ev.clientX - r.left) / r.width * dur); mediaCmd('seek', ms); media.position = ms; mediaAt = Date.now(); renderMedia(); };
+
+  // Mini player above the tabs on every screen except Music
+  const showMini = has && S.tab !== 'music';
+  mini.hidden = !showMini; document.body.classList.toggle('has-mini', showMini);
+  if (showMini) {
+    mini.innerHTML = `${media.art ? `<img src="${media.art}" alt="">` : `<div class="ph">${ICON.note}</div>`}
+      <a href="#music" style="min-width:0;color:inherit;text-decoration:none"><div class="t">${esc(media.title)}</div><div class="s">${esc(media.artist || media.app)}</div></a>
+      <button id="miniToggle" aria-label="${media.playing ? 'Pause' : 'Play'}">${media.playing ? ICON.pause : ICON.play}</button>
+      <button id="miniNext" aria-label="Next song">${ICON.next}</button>`;
+    $('#miniToggle').onclick = () => mediaCmd('toggle');
+    $('#miniNext').onclick = () => mediaCmd('next');
+  }
+}
+setInterval(() => {
+  if (!media || !media.playing || !media.duration) return;
+  const pos = livePos();
+  $$('.np-fill').forEach(el => { el.style.width = Math.min(100, pos / media.duration * 100) + '%'; });
+  $$('.np-pos').forEach(el => { el.textContent = mmss(pos); });
+}, 1000);
+window.addEventListener('hashchange', () => setTimeout(renderMedia, 0));
+
+/* Spotify account and playlists */
+let sp = { status: null, view: 'list', playlists: null, current: null, tracks: null, error: '', loading: false };
+const spStatus = () => { try { return JSON.parse(NATIVE.spotifyStatus()); } catch { return { connected: false, clientId: '', redirect: 'fuelstride://spotify' }; } };
+async function spApi(method, path, body) {
+  const r = JSON.parse(await callNative('spotifyApi', method, path, body ? JSON.stringify(body) : ''));
+  let json = null; try { json = r.body ? JSON.parse(r.body) : null; } catch {}
+  return { status: r.status, json };
+}
+function spErrText(status) {
+  if (status === -1) return 'Spotify sign-in expired. Connect again.';
+  if (status === 0) return 'No internet connection.';
+  if (status === 403) return 'Spotify refused the request. Developer apps now need Spotify Premium on the account that created the app, and your Spotify email must be listed under User Management in the developer dashboard.';
+  if (status === 429) return 'Spotify is rate-limiting requests. Wait a minute and try again.';
+  return `Spotify returned an error (${status}). Try again.`;
+}
+async function loadPlaylists() {
+  sp.loading = true; sp.error = ''; renderSpotify();
+  const all = [];
+  let path = '/v1/me/playlists?limit=50';
+  for (let i = 0; i < 6 && path; i++) {
+    const r = await spApi('GET', path);
+    if (r.status !== 200) { sp.error = spErrText(r.status); if (r.status === -1) sp.status = spStatus(); break; }
+    all.push(...(r.json.items || []).filter(Boolean));
+    path = r.json.next ? r.json.next.replace('https://api.spotify.com', '') : null;
+  }
+  sp.playlists = all; sp.loading = false; renderSpotify();
+}
+async function openPlaylist(p) {
+  sp.view = 'playlist'; sp.current = p; sp.tracks = null; sp.error = ''; renderSpotify();
+  $('#spotifyCard').scrollIntoView({ block: 'start', behavior: 'smooth' });
+  const items = [];
+  let path = `/v1/playlists/${encodeURIComponent(p.id)}/items?limit=100`;
+  for (let i = 0; i < 5 && path; i++) {
+    const r = await spApi('GET', path);
+    if (r.status !== 200) { sp.error = (r.status === 403 || r.status === 404) && !items.length ? 'Spotify only lets apps list the songs of playlists you created or collaborate on. You can still tap Play to start this one.' : spErrText(r.status); break; }
+    items.push(...(r.json.items || []));
+    path = r.json.next ? r.json.next.replace('https://api.spotify.com', '') : null;
+  }
+  sp.tracks = items.map(it => it.track || it.item).filter(t => t && t.name);
+  renderSpotify();
+}
+// Start a playlist (optionally at a song). Spotify only allows this for Premium; otherwise open it in Spotify.
+async function playFrom(p, index) {
+  const body = { context_uri: p.uri };
+  if (index != null) body.offset = { position: index };
+  toast('Starting on Spotify…');
+  let r = await spApi('PUT', '/v1/me/player/play', body);
+  if (r.status === 404) {
+    // No active Spotify device: open the app so it becomes one, then try again
+    try { NATIVE.openSpotify(p.uri); } catch {}
+    await new Promise(res => setTimeout(res, 3500));
+    r = await spApi('PUT', '/v1/me/player/play', body);
+  }
+  if (r.status >= 200 && r.status < 300) { toast('Playing ' + (index != null && sp.tracks?.[index] ? sp.tracks[index].name : p.name)); setTimeout(() => { try { NATIVE.mediaRefresh(); } catch {} }, 1200); return; }
+  const reason = r.json?.error?.reason || '';
+  if (r.status === 403 || reason === 'PREMIUM_REQUIRED') {
+    try { NATIVE.openSpotify(index != null && sp.tracks?.[index]?.uri ? sp.tracks[index].uri : p.uri); } catch {}
+    toast('Spotify Free can’t be started from other apps, so it opened in Spotify. Tap play there.');
+    return;
+  }
+  if (r.status !== 404) toast(spErrText(r.status));
+  else { toast('Opened Spotify. Tap play there, then use the controls here.'); }
+}
+function renderSpotify() {
+  const box = $('#spotifyCard'); if (!box) return;
+  if (!NATIVE) { box.innerHTML = '<h2>Spotify playlists</h2><div class="empty">Available in the Android app.</div>'; return; }
+  sp.status = sp.status || spStatus();
+  const st = sp.status;
+  if (!st.connected) {
+    box.innerHTML = `<div class="card-head"><h2 class="t-info">Spotify playlists<button class="info-btn" type="button" data-info="spotify" aria-label="How this works">i</button></h2><span class="chip gold">Not connected</span></div>
+      <p class="small muted" style="margin:0">Needs a <b>Spotify Premium</b> account (Spotify's rule since February 2026). Play, pause and skip above work without it.</p>
+      <details class="howto"><summary>Setup steps (about 3 minutes)</summary><ol class="small" style="margin:0;padding-left:18px;display:grid;gap:6px">
+        <li>Go to <b>developer.spotify.com/dashboard</b> and log in. On a phone, if you don't see <b>Create app</b>, open the browser menu (⋮) and tick <b>Desktop site</b>.</li>
+        <li>Tap <b>Create app</b>. Name it "Lightweight Baby", any description, and tick <b>Web API</b> and <b>Android</b>.</li>
+        <li>Under <b>Redirect URIs</b> add exactly this, then save:
+          <div class="copybox" style="margin-top:6px"><code id="spRedirect">${esc(st.redirect)}</code><button id="spCopy" class="ghost">Copy</button></div></li>
+        <li>For the Android package name, enter <code>com.fuelstride.nim</code> if asked.</li>
+        <li>Open the app's <b>Settings</b>, copy the <b>Client ID</b>, and paste it below.</li>
+      </ol></details>
+      <label class="field"><span>Spotify Client ID</span><input id="spClient" autocomplete="off" autocapitalize="off" spellcheck="false" value="${esc(st.clientId)}" placeholder="32 letters and numbers"></label>
+      <button id="spConnect" class="primary">Connect Spotify</button>
+      ${sp.error ? errBox(sp.error) : ''}
+      `;
+    $('#spCopy').onclick = () => { navigator.clipboard?.writeText(st.redirect).then(() => toast('Copied'), () => toast('Long-press the address to copy it')); };
+    $('#spConnect').onclick = () => {
+      const id = $('#spClient').value.trim();
+      if (!/^[a-z0-9]{32}$/i.test(id)) { toast('The Client ID is 32 letters and numbers. Check you copied all of it.'); return; }
+      sp.error = '';
+      try { NATIVE.spotifyConnect(id); } catch {}
+    };
+    return;
+  }
+  if (sp.view === 'playlist' && sp.current) {
+    const p = sp.current;
+    const img = p.images?.[0]?.url;
+    box.innerHTML = `<div class="row" style="justify-content:space-between"><button id="spBack" class="ghost">‹ Playlists</button><button id="spPlayAll" class="primary">${ICON.play.replace('<svg', '<svg width="18" height="18"')} Play</button></div>
+      <div class="pl" style="cursor:default">${img ? `<img src="${esc(img)}" alt="">` : '<div class="ph"></div>'}<div><div class="t">${esc(p.name)}</div><div class="s">${esc(p.owner?.display_name || '')}${sp.tracks && sp.tracks.length ? ` · ${sp.tracks.length} songs` : ''}</div></div><span></span></div>
+      ${sp.error ? errBox(sp.error) : ''}
+      ${!sp.tracks ? (sp.error ? '' : thinking('Loading songs…')) : sp.tracks.length ? `<div class="pl-list">${sp.tracks.map((t, i) => `<button class="tr" data-i="${i}"><span class="n">${i + 1}</span><span style="min-width:0"><div class="t" style="font-weight:600;overflow-wrap:anywhere">${esc(t.name)}</div><div class="s small muted">${esc((t.artists || []).map(a => a.name).join(', '))}</div></span><span class="n">${mmss(t.duration_ms || 0)}</span></button>`).join('')}</div>` : (sp.error ? '' : '<div class="empty">This playlist is empty.</div>')}`;
+    $('#spBack').onclick = () => { sp.view = 'list'; sp.current = null; sp.tracks = null; sp.error = ''; renderSpotify(); };
+    $('#spPlayAll').onclick = () => playFrom(p, null);
+    box.querySelectorAll('.tr').forEach(b => b.onclick = () => playFrom(p, +b.dataset.i));
+    return;
+  }
+  box.innerHTML = `<div class="card-head"><h2 class="t-info">Spotify playlists<button class="info-btn" type="button" data-info="spotify" aria-label="How this works">i</button></h2><div class="row" style="gap:6px"><button id="spRefresh" class="ghost">Refresh</button><button id="spDisconnect" class="ghost">Disconnect</button></div></div>
+    ${sp.error ? errBox(sp.error) : ''}
+    ${sp.loading && !sp.playlists ? thinking('Loading your playlists…') : ''}
+    ${sp.playlists ? (sp.playlists.length ? `<div class="pl-list">${sp.playlists.map((p, i) => {
+      const img = p.images?.[0]?.url; const n = p.tracks?.total ?? p.items?.total;
+      return `<button class="pl" data-i="${i}">${img ? `<img src="${esc(img)}" alt="" loading="lazy">` : '<div class="ph"></div>'}<div style="min-width:0"><div class="t">${esc(p.name)}</div><div class="s">${n != null ? n + ' songs · ' : ''}${esc(p.owner?.display_name || '')}</div></div><span class="muted">›</span></button>`; }).join('')}</div>`
+      : '<div class="empty">No playlists found on this Spotify account.</div>') : ''}`;
+  $('#spRefresh').onclick = () => loadPlaylists();
+  $('#spDisconnect').onclick = () => { try { NATIVE.spotifyDisconnect(); } catch {} sp = { status: null, view: 'list', playlists: null, current: null, tracks: null, error: '', loading: false }; renderSpotify(); toast('Spotify disconnected'); };
+  box.querySelectorAll('.pl[data-i]').forEach(b => b.onclick = () => openPlaylist(sp.playlists[+b.dataset.i]));
+  if (!sp.playlists && !sp.loading && !sp.error) loadPlaylists();
+}
+window.__spotifyAuth = result => {
+  sp.status = spStatus();
+  if (result === 'ok') { toast('Spotify connected'); sp.playlists = null; location.hash = '#music'; }
+  else sp.error = result === 'denied' ? 'You cancelled the Spotify sign-in.' : result === 'network' ? 'No internet connection during sign-in. Try again.' : 'Spotify sign-in failed. Check the Client ID and that the Redirect URI is exactly fuelstride://spotify.';
+  renderSpotify();
+};
+function initMusic() {
+  renderMedia(); renderSpotify();
+  try { NATIVE && NATIVE.mediaRefresh(); } catch {}
+}
+
+/* ---------- API key ---------- */
+function renderKey() {
+  const set = hasKey();
+  $('#keyChip').textContent = set ? 'Saved' : 'Not set';
+  $('#keyChip').className = 'chip ' + (set ? 'accent' : 'gold');
+  $('#apiKey').placeholder = set ? '•••••••• (saved — paste a new key to replace)' : 'nvapi-...';
+  $('#clearKey').hidden = !set;
+}
+$('#saveKey').onclick = () => {
+  const k = $('#apiKey').value.trim();
+  if (!k.startsWith('nvapi-')) { toast('That doesn\'t look like an NVIDIA API key. It starts with nvapi-'); return; }
+  try { NATIVE.setApiKey(k); } catch { toast('Could not save the key.'); return; }
+  $('#apiKey').value = ''; aiBlocked = false; renderKey(); applyAiAvailability(); toast('API key saved');
+};
+$('#clearKey').onclick = () => { try { NATIVE.setApiKey(''); } catch {} renderKey(); applyAiAvailability(); toast('API key removed'); };
+
+/* ---------- guides behind the ⓘ buttons ---------- */
+const GUIDES = {
+  calories: { title: 'Calories and macros', body: `
+    <p>The ring shows how much you can still eat today.</p>
+    <p><code>kcal left = daily target + burned − eaten</code></p>
+    <ul>
+      <li><b>Target</b> comes from your profile (see Profile → your plan).</li>
+      <li><b>Workouts</b> adds what you logged in Move or finished in Plan.</li>
+      <li><b>Steps bonus</b> adds about 0.0005 kcal × your weight for every step above 2,000. Everyday walking below that is already part of your target.</li>
+    </ul>
+    <h3>Protein, carbs and fat</h3>
+    <p>Bars fill from everything you've logged today against your daily gram targets.</p>
+    <div class="tip">If a food was added without carbs or fat, a "Fill in with AI" button appears here. One tap estimates them.</div>` },
+  todaySteps: { title: 'Steps', body: `
+    <p>Your step count for the selected day, with progress toward your daily goal.</p>
+    <ul><li>Steps come from <b>Samsung Health</b> through Health Connect, or from what you enter in Move.</li>
+    <li>Distance is estimated at about 0.76 m per step.</li></ul>
+    <div class="tip">Tap <b>Update</b> to see where the steps came from, or sync again.</div>` },
+  todayPlan: { title: 'Workout plan', body: `
+    <p>A summary of today's workout: name, time, intensity and how many exercises you've finished.</p>
+    <p>Tap <b>Open plan</b> to log sets, or <b>Suggest a workout</b> if you don't have one yet. "Next up" follows your training split.</p>` },
+  meals: { title: 'Meals', body: `<p>Everything you've eaten today, grouped by meal with calories per meal. Tap <b>Log food</b> to add more, or go to the Food tab to delete or fix entries.</p>` },
+  trend: { title: 'Last 7 days', body: `
+    <p>The week ending on the day selected at the top.</p>
+    <ul><li>The <b>dashed line</b> is your target (calories or steps).</li>
+    <li>The <b>brighter bar</b> is the day you're viewing.</li>
+    <li><b>avg</b> is the 7-day average, counting days you didn't log as zero.</li></ul>
+    <div class="tip">Use the ‹ › arrows at the top to look back at earlier weeks.</div>` },
+  logFood: { title: 'Logging food', body: `
+    <h3>Photo</h3>
+    <ol><li>Pick the meal (breakfast, lunch, snack or dinner).</li>
+    <li>Tap <b>Take photo</b> or <b>Choose photo</b>. Shoot from above with the whole plate in view.</li>
+    <li>Optionally add notes like "2 rotis, cooked in ghee". The AI trusts notes over the photo.</li>
+    <li>Tap <b>Estimate</b> and wait about 20–30 seconds.</li></ol>
+    <h3>Describe or speak</h3>
+    <p>Type what you ate, or tap <b>Speak</b> and say it. Casual speech is fine, even "two rotis, no actually three". The estimate starts as soon as you finish speaking.</p>
+    <h3>Check before adding</h3>
+    <p>Every item shows up for review. Fix names or calories (changing calories scales the macros too), remove wrong items, then tap <b>Add</b>.</p>
+    <div class="tip">Hidden oil and portion size are the hardest to judge. Mention them in notes for better numbers.</div>` },
+  manualFood: { title: 'Add by hand', body: `
+    <p>For packaged food or anything with a known label.</p>
+    <ul><li><b>Food</b> and <b>kcal</b> are required.</li>
+    <li>Leave <b>protein, carbs or fat</b> blank and the AI fills them in from the food and calories (about 15 seconds, in the background).</li>
+    <li>If you fill in all three, no AI request is made.</li></ul>
+    <p>The entry goes into the meal selected above.</p>` },
+  mealList: { title: "Day's food", body: `
+    <p>Each line shows the food, portion, protein (P), carbs (C) and fat (F) in grams, and calories.</p>
+    <ul><li>Tap <b>×</b> to delete an entry.</li>
+    <li>"<b>carbs/fat missing</b>" means that food was saved without them. Use <b>Fill in with AI</b> to estimate them.</li>
+    <li>"from photo" marks items estimated from a picture.</li></ul>` },
+  moveSteps: { title: 'Steps from Samsung Health', body: `
+    <ol><li>In Samsung Health: <b>⋮ → Settings → Health Connect</b>, and allow it to share <b>Steps</b>.</li>
+    <li>Here, tap <b>Connect Samsung Health</b> and allow access.</li></ol>
+    <p>Steps then sync whenever you open the app and every 2 minutes while it's open, for today and the last 7 days.</p>
+    <h3>Numbers don't match?</h3>
+    <p>Samsung Health only sends steps every so often. Open Samsung Health for a few seconds, come back and tap <b>Sync now</b>. The breakdown shows which apps wrote steps and when.</p>
+    <div class="tip">Without Health Connect you can type steps in, or use the +1,000 buttons.</div>` },
+  logWorkout: { title: 'Logging a workout', body: `
+    <h3>Describe it</h3>
+    <p>Type or speak what you did, like "30 min run, then 3 × 12 push-ups". The AI splits it into sessions and estimates calories burned. You review before it's saved.</p>
+    <h3>By hand</h3>
+    <p>Pick the type, minutes and effort. Calories use standard activity values (MET):</p>
+    <p><code>kcal ≈ MET × your kg × hours × effort</code></p>
+    <div class="tip">Workouts from the Plan tab are logged automatically when you tap Finish, so don't log them twice.</div>` },
+  workoutList: { title: 'Workouts', body: `<p>Everything you've logged for the day. Their calories are added to your budget on the Today screen. Tap <b>×</b> to remove one.</p>` },
+  planBuilder: { title: 'AI workout plans', body: `
+    <p>The AI writes a session for today using:</p>
+    <ul><li>your profile (goal, experience, equipment, injuries)</li>
+    <li>your <b>training split</b>: "Next in my split" picks the next day in your rotation, like Push → Pull → Legs</li>
+    <li>your last 7 days of workouts and steps, and what you've eaten today</li>
+    <li>your <b>recent lifts</b>, to suggest weights. It adds about 2.5 kg (upper body) or 5 kg (lower body) if you hit all your reps last time</li></ul>
+    <p>Set the time available, override the focus if you want, and add notes like "left knee sore".</p>
+    <div class="tip">It takes about 20–60 seconds. You can edit anything it suggests.</div>` },
+  planView: { title: 'Doing your workout', body: `
+    <ol><li>Each exercise has rows for every set: <b>kg</b>, <b>reps</b> and <b>✓</b>.</li>
+    <li>Weights are prefilled from the AI's suggestion or your last session. Change them if needed, then tap <b>✓</b> when the set is done.</li>
+    <li>Use <b>+ Set / − Set</b> to change the number of sets.</li>
+    <li>When you're done, tap <b>Finish and log</b>. Calories and total kg lifted are saved to your workouts.</li></ol>
+    <h3>Memory</h3>
+    <p>Under each exercise you'll see your last session and best set. Tap it for your history and estimated 1-rep max:</p>
+    <p><code>1RM ≈ kg × (1 + reps ÷ 30)</code></p>
+    <h3>Make it yours</h3>
+    <p><b>Edit</b> changes exercises, sets and order. <b>Save as my workout</b> keeps it for later.</p>` },
+  planEditor: { title: 'Editing a workout', body: `
+    <ul><li>Rename the workout and choose its day type, which keeps your split rotation correct.</li>
+    <li>Write sets × reps like <code>4 × 8</code> or <code>3 × 8–12</code> for weight rows. Anything else becomes a tick-off item.</li>
+    <li>Use <b>↑ ↓</b> to reorder, <b>Remove</b> to delete, and <b>+ Add exercise</b> or <b>+ Add section</b> to grow it.</li>
+    <li>Use the same exercise names each time so your history and best lifts connect.</li></ul>
+    <p>Tap <b>Done</b> to go back to logging.</p>` },
+  myWorkouts: { title: 'My workouts', body: `
+    <ul><li><b>+ Create</b> starts a blank workout in edit mode.</li>
+    <li><b>Save as my workout</b> (at the bottom of any plan) stores it here, including AI plans you've changed.</li>
+    <li><b>Start</b> loads it as today's plan, with weights from your last session.</li>
+    <li>Edit a started workout and tap <b>Update my saved workout</b> to change the template.</li></ul>
+    <div class="tip">If today's plan already has logged sets, Start and Delete need a second tap so nothing is lost by accident.</div>` },
+  yourPlan: { title: 'How your numbers are worked out', body: `
+    <h3>Resting burn (BMR)</h3>
+    <p>Mifflin–St Jeor: <code>10 × kg + 6.25 × cm − 5 × age + 5</code> (men) or <code>− 161</code> (women).</p>
+    <h3>Maintenance</h3>
+    <p>BMR × your daily-life level: 1.2 (mostly sitting), 1.3 (on your feet some) or 1.45 (on your feet a lot). Workouts are added separately each day.</p>
+    <h3>Daily target</h3>
+    <ul><li><b>Lose fat:</b> maintenance minus pace × 1,100 kcal (0.5 kg/week ≈ −550). 1 kg of fat ≈ 7,700 kcal.</li>
+    <li><b>Recomp:</b> −250 kcal, with high protein to keep muscle.</li>
+    <li><b>Build muscle:</b> maintenance plus pace × 600 kcal.</li></ul>
+    <h3>Macros</h3>
+    <p>Protein is 1.4 g/kg (maintain), 1.8 g/kg (lose or gain) or 2.0 g/kg (recomp). Fat is about 28% of calories. Carbs fill the rest.</p>
+    <h3>Water and goal date</h3>
+    <p>Water is about 35 ml per kg. The goal date assumes you keep your chosen pace.</p>
+    <div class="tip">Your log is stored only on this phone and is deleted if you uninstall the app. Estimates are a guide, not medical advice.</div>` },
+  apiKey: { title: 'Your NVIDIA NIM key', body: `
+    <p>Photo and text estimates, workout plans and macro fill-ins use NVIDIA's <b>Nemotron 3.5 Super VL</b> model through NIM.</p>
+    <ol><li>Go to <b>build.nvidia.com</b> and sign in or sign up.</li>
+    <li>Open any model page and tap <b>Get API Key</b>.</li>
+    <li>Copy the key (it starts with <code>nvapi-</code>), paste it above and tap <b>Save key</b>.</li></ol>
+    <p>NVIDIA gives free credits to start. The key is stored only on this phone.</p>
+    <div class="tip">Never post your key anywhere. If it leaks, delete it on build.nvidia.com and create a new one.</div>` },
+  profileAbout: { title: 'About you', body: `<p>Age, sex, height and weight set your resting burn (BMR), BMI and protein target. <b>Update your weight</b> every week or two so targets stay accurate. Your name is only used to personalise the plan card.</p>` },
+  profileGoal: { title: 'Goal and lifestyle', body: `
+    <ul><li><b>Goal</b> sets whether you eat below or above maintenance (see your plan card for the maths).</li>
+    <li><b>Target weight</b> and <b>pace</b> give your goal date. Faster pace means a bigger daily deficit.</li>
+    <li><b>Daily life</b> is your activity outside workouts. Workouts are counted separately, so don't count gym time here.</li>
+    <li><b>Step goal</b> sets the steps ring and bar.</li></ul>` },
+  profileTraining: { title: 'Training', body: `
+    <p>The AI uses these to write plans that fit you.</p>
+    <ul><li><b>Split</b> sets the rotation (Push → Pull → Legs, Upper → Lower, or Full body) shown as "Next up".</li>
+    <li><b>Days per week</b> and <b>session length</b> shape volume and recovery.</li>
+    <li><b>Equipment</b> limits exercises to what you have.</li>
+    <li><b>Injuries</b> makes the AI avoid aggravating moves and offer safe swaps.</li></ul>` },
+  profileFood: { title: 'Food preferences', body: `<p>Your diet and usual food (for example "South Indian home food") help the AI judge portions, cooking oil and dishes in photos, so the estimates are closer to your real meals.</p>` },
+  appearance: { title: 'Appearance', body: `<ul><li><b>System</b> follows your phone's light or dark mode automatically.</li><li><b>Light</b> or <b>Dark</b> always uses that look.</li></ul><p>The status bar and navigation bar match the app.</p>` },
+  nowPlaying: { title: 'Now playing', body: `
+    <p>Controls whatever music app is playing, usually Spotify. Play, pause, previous and next always work.</p>
+    <p>To see the song, artwork and progress (and get the mini player on other tabs), allow this app under <b>Notification access</b>. It only reads the music player.</p>
+    <div class="tip">Tap the progress bar to jump to a point in the song.</div>` },
+  spotify: { title: 'Spotify playlists', body: `
+    <ul><li>Spotify requires a <b>Premium</b> account for apps like this (their rule since February 2026).</li>
+    <li>Your playlists are listed with cover art. Tap one to see its songs, then <b>Play</b> or tap a song to start there.</li>
+    <li>Spotify only shows the songs of playlists <b>you created or collaborate on</b>. Others can still be played.</li>
+    <li>If you see "refused", add your Spotify email under <b>User Management</b> in your Spotify developer app.</li></ul>` }
+};
+let lastFocus = null;
+function openGuide(k) {
+  const g = GUIDES[k]; if (!g) return;
+  lastFocus = document.activeElement;
+  $('#sheetTitle').textContent = g.title;
+  $('#sheetBody').innerHTML = g.body;
+  $('#sheet').hidden = false;
+  $('#sheetClose').focus();
+}
+function closeGuide() { if ($('#sheet').hidden) return false; $('#sheet').hidden = true; try { lastFocus?.focus(); } catch {} return true; }
+document.addEventListener('click', e => {
+  const b = e.target.closest('.info-btn');
+  if (b) { e.preventDefault(); e.stopPropagation(); openGuide(b.dataset.info); return; }
+  if (e.target.closest('[data-close-sheet]')) closeGuide();
+}, true);
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeGuide(); });
+// Android back button closes the guide first
+window.__onBack = () => closeGuide();
+
+/* ---------- appearance (light / dark / system) ---------- */
+const THEME_KEY = 'fs-theme';
+const themePref = () => { try { return localStorage.getItem(THEME_KEY) || 'system'; } catch { return 'system'; } };
+function systemDark() {
+  try { if (NATIVE && NATIVE.isSystemDark) return !!NATIVE.isSystemDark(); } catch {}
+  return matchMedia('(prefers-color-scheme: dark)').matches;
+}
+function applyTheme() {
+  const pref = themePref(), dark = pref === 'dark' || (pref === 'system' && systemDark());
+  document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+  try { NATIVE && NATIVE.setSystemBars && NATIVE.setSystemBars(dark); } catch {}
+  $$('[data-theme-choice]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.themeChoice === pref)));
+}
+$$('[data-theme-choice]').forEach(b => b.onclick = () => {
+  try { localStorage.setItem(THEME_KEY, b.dataset.themeChoice); } catch {}
+  applyTheme();
+});
+window.__systemTheme = () => { if (themePref() === 'system') applyTheme(); };
+try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', window.__systemTheme); } catch {}
+applyTheme();
+
+/* ---------- boot ---------- */
+aiImages = true;
+route(); render();
+function boot() {
+  useLocal(' ');
+  $('#storageNote').hidden = true;
+  applyAiAvailability(); renderKey(); setupVoice(); initHealth(); initMusic();
+}
+boot();
+})();
+</script>
+</body>
+</html>

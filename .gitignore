@@ -1,0 +1,26 @@
+# Build output
+build/
+.gradle/
+*.apk
+*.aab
+*.ap_
+*.dex
+*.class
+
+# Machine-specific settings (contain local paths)
+local.properties
+.idea/
+*.iml
+.DS_Store
+Thumbs.db
+
+# Editor/tooling scratch
+.claude/
+*.bak
+*.log
+
+# Signing keys and secrets — never commit these
+*.jks
+*.keystore
+keystore.properties
+.env

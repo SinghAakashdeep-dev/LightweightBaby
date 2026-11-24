@@ -1,0 +1,1105 @@
+<title>Lightweight Baby</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap">
+<style>
+/* Layout: mobile-first single column with a bottom tab bar; wide screens get a top tab row and a two-column Today view. */
+:root{
+  --bg:#EDF1EE; --surface:#FFFFFF; --surface-2:#F4F7F5; --ink:#14201B; --muted:#5A6A63; --line:#D6DFDA;
+  --accent:#1E6B57; --accent-ink:#FFFFFF; --accent-soft:#D7EAE2;
+  --ember:#CF5326; --ember-soft:#FAE2D7; --sky:#2C68C6; --sky-soft:#DBE6F8; --gold:#A87A12; --gold-soft:#F5EACB;
+  --bad:#B83A28;
+  --font-display:'Sora','Segoe UI',system-ui,sans-serif;
+  --font-body:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --font-num:'JetBrains Mono',ui-monospace,'Cascadia Mono',monospace;
+  --radius:14px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0E1412; --surface:#16201C; --surface-2:#1C2823; --ink:#E5EDE9; --muted:#93A39B; --line:#2A3832;
+  --accent:#55B897; --accent-ink:#06120D; --accent-soft:#1B3A30;
+  --ember:#F07B4F; --ember-soft:#3B2219; --sky:#73A5F2; --sky-soft:#1A2A42; --gold:#E0B44E; --gold-soft:#3A2F14;
+  --bad:#F07763; color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#0E1412; --surface:#16201C; --surface-2:#1C2823; --ink:#E5EDE9; --muted:#93A39B; --line:#2A3832;
+  --accent:#55B897; --accent-ink:#06120D; --accent-soft:#1B3A30;
+  --ember:#F07B4F; --ember-soft:#3B2219; --sky:#73A5F2; --sky-soft:#1A2A42; --gold:#E0B44E; --gold-soft:#3A2F14;
+  --bad:#F07763; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:15px;line-height:1.5}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+h1,h2,h3{font-family:var(--font-display);margin:0;text-wrap:balance;letter-spacing:-.01em}
+h2{font-size:1.05rem;font-weight:600}
+h3{font-size:.95rem;font-weight:600}
+.num{font-family:var(--font-num);font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+.small{font-size:.82rem}
+.label{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600}
+
+.wrap{max-width:1080px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+header.top .wrap{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:12px}
+.brand{display:flex;align-items:center;gap:10px}
+.brand-mark{width:30px;height:30px;border-radius:9px;background:var(--accent);display:grid;place-items:center}
+.brand h1{font-size:1.1rem;font-weight:700}
+.datenav{display:flex;align-items:center;gap:4px}
+.datenav button{width:34px;height:34px}
+.datenav .d{min-width:104px;text-align:center;font-weight:600;font-size:.92rem}
+
+nav.tabs{display:none}
+nav.bottom{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--surface);border-top:1px solid var(--line);
+  padding-bottom:env(safe-area-inset-bottom,0px);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
+nav.bottom .row{display:grid;grid-template-columns:repeat(5,1fr)}
+nav.bottom a,nav.tabs a{color:var(--muted);text-decoration:none;font-weight:600}
+nav.bottom a{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 2px 10px;font-size:.72rem}
+nav.bottom a svg{width:22px;height:22px}
+nav.bottom a[aria-current="page"],nav.tabs a[aria-current="page"]{color:var(--accent)}
+main{padding-block:16px 110px}
+@media (min-width:900px){
+  nav.bottom{display:none}
+  nav.tabs{display:flex;gap:4px}
+  nav.tabs a{padding:8px 14px;border-radius:999px;font-size:.9rem}
+  nav.tabs a[aria-current="page"]{background:var(--accent-soft)}
+  main{padding-block:24px 48px}
+}
+
+.view{display:grid;gap:14px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px;display:grid;gap:12px;min-width:0}
+.card-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.grid2{display:grid;gap:14px}
+@media (min-width:900px){.grid2{grid-template-columns:1.15fr 1fr;align-items:start}.col{display:grid;gap:14px;min-width:0}}
+.col{display:grid;gap:14px;min-width:0}
+
+button,.btn{font:inherit;cursor:pointer;border-radius:10px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);padding:9px 14px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+button:hover{border-color:var(--muted)}
+button:disabled{opacity:.55;cursor:not-allowed}
+button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+button.ghost{background:transparent}
+button.icon{padding:0;width:38px;height:38px}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+input,select,textarea{font:inherit;color:var(--ink);background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:9px 11px;width:100%;min-width:0}
+textarea{resize:vertical;min-height:84px}
+.field{display:grid;gap:5px}
+.field > span{font-size:.8rem;color:var(--muted);font-weight:600}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.row > .grow{flex:1 1 160px}
+.fields{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(140px,1fr))}
+.seg{display:inline-flex;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:3px}
+.seg button{border:0;background:transparent;padding:7px 14px;border-radius:8px;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.12)}
+
+/* Today hero */
+.hero{display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:center}
+@media (max-width:420px){.hero{grid-template-columns:1fr;justify-items:center}}
+.ring{position:relative;width:150px;height:150px}
+.ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring .center{position:absolute;inset:0;display:grid;place-content:center;text-align:center}
+.ring .big{font-family:var(--font-num);font-size:1.7rem;font-weight:600;line-height:1.1}
+.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 14px;width:100%}
+.stat .v{font-family:var(--font-num);font-size:1.15rem;font-weight:600}
+.equation{font-size:.8rem;color:var(--muted)}
+.macro{display:grid;gap:4px}
+.macro .top{display:flex;justify-content:space-between;font-size:.85rem}
+.bar{height:8px;border-radius:99px;background:var(--surface-2);overflow:hidden;border:1px solid var(--line)}
+.bar > i{display:block;height:100%;border-radius:99px}
+.chip{display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:99px;font-size:.75rem;font-weight:600}
+.chip.ember{background:var(--ember-soft);color:var(--ember)}
+.chip.sky{background:var(--sky-soft);color:var(--sky)}
+.chip.accent{background:var(--accent-soft);color:var(--accent)}
+.chip.gold{background:var(--gold-soft);color:var(--gold)}
+
+.list{display:grid}
+.item{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}
+.item:first-child{border-top:0}
+.item .name{font-weight:600;min-width:0;overflow-wrap:anywhere}
+.item .sub{font-size:.8rem;color:var(--muted)}
+.item .k{font-family:var(--font-num);font-weight:600;white-space:nowrap}
+.item button{width:30px;height:30px;padding:0;background:transparent;border-color:transparent;color:var(--muted)}
+.item button:hover{color:var(--bad);border-color:var(--line)}
+.group-title{display:flex;justify-content:space-between;margin-top:6px;padding-top:8px}
+.empty{padding:14px;border:1px dashed var(--line);border-radius:10px;color:var(--muted);font-size:.9rem;text-align:center}
+
+.review{border:1px solid var(--accent);background:var(--accent-soft);border-radius:var(--radius);padding:14px;display:grid;gap:10px}
+.review-row{display:grid;grid-template-columns:minmax(0,1fr) 84px 34px;gap:8px;align-items:center}
+.review-row .macros{grid-column:1 / -1;font-size:.78rem;color:var(--muted);margin-top:-4px}
+.review-row input{background:var(--surface)}
+.photo-preview{max-height:220px;border-radius:10px;object-fit:cover;width:100%}
+.notice{padding:10px 12px;border-radius:10px;background:var(--gold-soft);color:var(--ink);font-size:.86rem}
+.notice.err{background:var(--ember-soft)}
+.thinking{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:.9rem}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--accent);animation:pulse 1s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.25}}
+@media (prefers-reduced-motion:reduce){.dot{animation:none}}
+
+.steps-big{font-family:var(--font-num);font-size:2.2rem;font-weight:600;line-height:1}
+.chart{width:100%;height:auto;display:block}
+.chart text{fill:var(--muted);font-family:var(--font-num);font-size:9px}
+
+.plan-block{display:grid;gap:6px}
+.ex{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:start;padding:10px;border-radius:10px;background:var(--surface-2);border:1px solid var(--line)}
+.ex input{width:20px;height:20px;margin-top:2px;accent-color:var(--accent)}
+.ex.done .ex-name{text-decoration:line-through;color:var(--muted)}
+.ex-name{font-weight:600}
+.ex-meta{font-size:.82rem;color:var(--muted)}
+.mic[aria-pressed="true"]{background:var(--ember);border-color:var(--ember);color:#fff}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;font-weight:600;font-size:.9rem;z-index:20;max-width:calc(100% - 32px)}
+@media (min-width:900px){.toast{bottom:24px}}
+</style>
+
+<header class="top">
+  <div class="wrap">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent-ink)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 13h4l3-8 4 14 3-6h4"/></svg>
+      </div>
+      <h1>Lightweight Baby</h1>
+    </div>
+    <nav class="tabs" aria-label="Sections">
+      <a href="#today">Today</a><a href="#food">Food</a><a href="#move">Move</a><a href="#plan">Plan</a><a href="#profile">Profile</a>
+    </nav>
+    <div class="datenav">
+      <button class="icon ghost" id="prevDay" aria-label="Previous day">&#8249;</button>
+      <div class="d" id="dateLabel">Today</div>
+      <button class="icon ghost" id="nextDay" aria-label="Next day">&#8250;</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div id="storageNote" class="notice" hidden style="margin-bottom:14px"></div>
+
+  <!-- TODAY -->
+  <section id="v-today" class="view" hidden>
+    <div class="grid2">
+      <div class="col">
+        <div class="card" id="todayHero"></div>
+        <div class="card" id="todaySteps"></div>
+      </div>
+      <div class="col">
+        <div class="card" id="todayPlan"></div>
+        <div class="card" id="todayMeals"></div>
+        <div class="card" id="trend"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOD -->
+  <section id="v-food" class="view" hidden>
+    <div class="grid2">
+      <div class="col">
+        <div class="card">
+          <div class="card-head">
+            <h2>Log food</h2>
+            <div class="seg" role="group" aria-label="Input method">
+              <button id="modePhoto" aria-pressed="true">Photo</button>
+              <button id="modeText" aria-pressed="false">Describe</button>
+            </div>
+          </div>
+          <label class="field"><span>Meal</span>
+            <select id="mealType">
+              <option value="breakfast">Breakfast</option><option value="lunch">Lunch</option>
+              <option value="snack">Snack</option><option value="dinner">Dinner</option>
+            </select>
+          </label>
+          <div id="photoPane" class="view" style="gap:10px">
+            <div class="row">
+              <label class="btn primary" for="camInput" style="background:var(--accent);color:var(--accent-ink);border-color:var(--accent)">Take photo</label>
+              <label class="btn" for="fileInput">Choose photo</label>
+              <input type="file" id="camInput" accept="image/*" capture="environment" hidden>
+              <input type="file" id="fileInput" accept="image/*" hidden>
+            </div>
+            <img id="photoPreview" class="photo-preview" alt="Selected meal photo" hidden>
+            <label class="field"><span>Notes for accuracy (optional)</span>
+              <input id="photoNote" placeholder="e.g. 2 rotis, cooked in ghee, half portion">
+            </label>
+            <button id="analyzePhoto" class="primary" disabled>Estimate calories from photo</button>
+          </div>
+          <div id="textPane" class="view" style="gap:10px" hidden>
+            <label class="field"><span>What did you eat?</span>
+              <textarea id="foodText" placeholder="Type or speak it, e.g. 2 scrambled eggs, 1 slice whole-wheat toast with butter, a cappuccino"></textarea>
+            </label>
+            <div class="row">
+              <button id="analyzeText" class="primary grow">Estimate calories</button>
+              <button id="foodMic" class="mic" aria-pressed="false" aria-label="Speak what you ate" hidden>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
+                <span class="micLabel">Speak</span>
+              </button>
+            </div>
+            <p class="small muted voiceHint" style="margin:0"></p>
+          </div>
+          <div id="foodStatus"></div>
+          <div id="foodReview" hidden></div>
+          <p id="aiMissingFood" class="notice" hidden>AI estimates need Claude. Open this page on claude.ai while signed in. You can still add foods by hand below.</p>
+        </div>
+        <div class="card">
+          <h3>Add by hand</h3>
+          <div class="fields">
+            <label class="field" style="grid-column:1/-1"><span>Food</span><input id="mName" placeholder="Banana"></label>
+            <label class="field"><span>kcal</span><input id="mKcal" type="number" inputmode="numeric" min="0" placeholder="105"></label>
+            <label class="field"><span>Protein g</span><input id="mP" type="number" inputmode="decimal" min="0" placeholder="1"></label>
+          </div>
+          <button id="addManualFood">Add food</button>
+        </div>
+      </div>
+      <div class="col">
+        <div class="card" id="mealList"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MOVE -->
+  <section id="v-move" class="view" hidden>
+    <div class="grid2">
+      <div class="col">
+        <div class="card">
+          <div class="card-head"><h2>Steps</h2><span id="stepsGoalChip" class="chip sky"></span></div>
+          <div id="stepsView"></div>
+          <div class="row">
+            <input id="stepsInput" class="grow" type="number" inputmode="numeric" min="0" placeholder="Steps so far" aria-label="Steps so far">
+            <button id="saveSteps" class="primary">Save steps</button>
+          </div>
+          <div class="row">
+            <button class="addSteps" data-n="1000">+1,000</button>
+            <button class="addSteps" data-n="2500">+2,500</button>
+            <button class="addSteps" data-n="5000">+5,000</button>
+          </div>
+          <p class="small muted" style="margin:0">Web pages can't read your phone's step sensor. Copy the number from Apple Health, Google Fit or your watch.</p>
+        </div>
+        <div class="card">
+          <h2>Log a workout</h2>
+          <label class="field"><span>Describe it</span>
+            <textarea id="woText" placeholder="e.g. 30 min run at 6 min/km, then 3 sets of 12 push-ups and 3 x 45 s plank"></textarea>
+          </label>
+          <div class="row">
+            <button id="woAI" class="primary grow">Log with AI estimate</button>
+            <button id="woMic" class="mic" aria-pressed="false" aria-label="Speak your workout" hidden>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
+              <span class="micLabel">Speak</span>
+            </button>
+          </div>
+          <p class="small muted voiceHint" style="margin:0"></p>
+          <div id="woStatus"></div>
+          <div id="woReview" hidden></div>
+          <details>
+            <summary class="small" style="cursor:pointer;font-weight:600">Or enter it by hand</summary>
+            <div class="fields" style="margin-top:10px">
+              <label class="field"><span>Type</span>
+                <select id="wType">
+                  <option value="push" selected>Push day</option><option value="pull">Pull day</option><option value="legs">Leg day</option>
+                  <option value="strength">Strength (other)</option>
+                  <option value="walk">Walking</option><option value="run">Running</option><option value="cycle">Cycling</option>
+                  <option value="hiit">HIIT</option>
+                  <option value="swim">Swimming</option><option value="yoga">Yoga / mobility</option><option value="sport">Sports</option>
+                </select>
+              </label>
+              <label class="field"><span>Minutes</span><input id="wMin" type="number" inputmode="numeric" min="1" placeholder="40"></label>
+              <label class="field"><span>Effort</span>
+                <select id="wEffort"><option value="0.8">Easy</option><option value="1" selected>Moderate</option><option value="1.25">Hard</option></select>
+              </label>
+              <label class="field" style="grid-column:1/-1"><span>Name (optional)</span><input id="wName" placeholder="Leg day"></label>
+            </div>
+            <button id="addManualWo" style="margin-top:10px">Add workout</button>
+          </details>
+        </div>
+      </div>
+      <div class="col"><div class="card" id="woList"></div></div>
+    </div>
+  </section>
+
+  <!-- PLAN -->
+  <section id="v-plan" class="view" hidden>
+    <div class="grid2">
+      <div class="col">
+        <div class="card">
+          <h2>Today's workout plan</h2>
+          <p class="small muted" style="margin:0">Built from your profile, your last 7 days of training, and what you've eaten and walked today.</p>
+          <div id="splitInfo"></div>
+          <div class="fields">
+            <label class="field"><span>Time available</span>
+              <select id="pTime"><option>15</option><option>30</option><option selected>45</option><option>60</option><option>90</option></select>
+            </label>
+            <label class="field"><span>Focus</span>
+              <select id="pFocus">
+                <option value="auto">Next in my split</option>
+                <optgroup label="Push / Pull / Legs">
+                  <option value="push">Push (chest, shoulders, triceps)</option>
+                  <option value="pull">Pull (back, biceps, rear delts)</option>
+                  <option value="legs">Legs (quads, hamstrings, glutes)</option>
+                </optgroup>
+                <optgroup label="Other">
+                  <option value="upper">Upper body</option><option value="lower">Lower body</option><option value="full">Full body</option>
+                  <option value="cardio">Cardio / conditioning</option><option value="core">Core</option><option value="mobility">Mobility / recovery</option>
+                </optgroup>
+              </select>
+            </label>
+            <label class="field" style="grid-column:1/-1"><span>Anything to know? (optional)</span>
+              <input id="pNote" placeholder="e.g. left knee is sore, only have dumbbells today">
+            </label>
+          </div>
+          <button id="buildPlan" class="primary">Build today's plan</button>
+          <div id="planStatus"></div>
+          <p id="aiMissingPlan" class="notice" hidden>Plans are written by Claude. Open this page on claude.ai while signed in to use it.</p>
+        </div>
+      </div>
+      <div class="col"><div class="card" id="planView"></div></div>
+    </div>
+  </section>
+
+  <!-- PROFILE -->
+  <section id="v-profile" class="view" hidden>
+    <div class="grid2">
+      <div class="col">
+        <div class="card" id="targetsView"></div>
+      </div>
+      <div class="col">
+        <div class="card">
+          <h2>About you</h2>
+          <div class="fields">
+            <label class="field" style="grid-column:1/-1"><span>Name (optional)</span><input id="fName" autocomplete="given-name" placeholder="What should the app call you?"></label>
+            <label class="field"><span>Sex</span><select id="fSex"><option value="male">Male</option><option value="female">Female</option><option value="other">Prefer not to say</option></select></label>
+            <label class="field"><span>Age</span><input id="fAge" type="number" inputmode="numeric" min="13" max="100"></label>
+            <label class="field"><span>Height (cm)</span><input id="fH" type="number" inputmode="decimal" min="100" max="250"></label>
+            <label class="field"><span>Weight (kg)</span><input id="fW" type="number" inputmode="decimal" min="30" max="300" step="0.1"></label>
+          </div>
+        </div>
+        <div class="card">
+          <h2>Goal and lifestyle</h2>
+          <div class="fields">
+            <label class="field"><span>Goal</span>
+              <select id="fGoal"><option value="lose">Lose fat</option><option value="recomp">Lose fat, keep muscle (recomp)</option><option value="maintain" selected>Maintain</option><option value="gain">Build muscle</option></select>
+            </label>
+            <label class="field"><span>Target weight (kg)</span><input id="fGoalW" type="number" inputmode="decimal" min="30" max="300" step="0.1" placeholder="optional"></label>
+            <label class="field"><span>Pace</span>
+              <select id="fPace"><option value="0.25">Gentle (0.25 kg / week)</option><option value="0.5" selected>Steady (0.5 kg / week)</option><option value="0.75">Fast (0.75 kg / week)</option></select>
+            </label>
+            <label class="field"><span>Daily life (outside workouts)</span>
+              <select id="fAct"><option value="1.2">Mostly sitting (desk job)</option><option value="1.3" selected>On my feet some</option><option value="1.45">On my feet a lot</option></select>
+            </label>
+            <label class="field"><span>Daily step goal</span><input id="fSteps" type="number" inputmode="numeric" min="1000" step="500"></label>
+          </div>
+        </div>
+        <div class="card">
+          <h2>Training</h2>
+          <div class="fields">
+            <label class="field"><span>Experience</span>
+              <select id="fExp"><option value="beginner">Beginner (under 6 months)</option><option value="intermediate">Intermediate (6 months – 2 years)</option><option value="advanced">Advanced (2+ years)</option></select>
+            </label>
+            <label class="field"><span>Training split</span>
+              <select id="fSplit"><option value="ppl">Push / Pull / Legs</option><option value="ul">Upper / Lower</option><option value="fb">Full body</option><option value="auto">Let Claude decide</option></select>
+            </label>
+            <label class="field"><span>Days per week</span>
+              <select id="fDays"><option>2</option><option>3</option><option selected>4</option><option>5</option><option>6</option></select>
+            </label>
+            <label class="field"><span>Usual session length</span>
+              <select id="fSess"><option value="30">30 min</option><option value="45" selected>45 min</option><option value="60">60 min</option><option value="90">90 min</option></select>
+            </label>
+            <label class="field" style="grid-column:1/-1"><span>Equipment you have</span>
+              <input id="fEquip" placeholder="e.g. full gym, or dumbbells 5–20 kg and a bench">
+            </label>
+            <label class="field" style="grid-column:1/-1"><span>Injuries or limits (optional)</span>
+              <input id="fInj" placeholder="e.g. lower back pain, no overhead pressing">
+            </label>
+          </div>
+        </div>
+        <div class="card">
+          <h2>Food</h2>
+          <div class="fields">
+            <label class="field"><span>Diet</span>
+              <select id="fDiet"><option value="none">No restrictions</option><option value="vegetarian">Vegetarian</option><option value="eggetarian">Eggetarian</option><option value="vegan">Vegan</option><option value="pescatarian">Pescatarian</option></select>
+            </label>
+            <label class="field"><span>Food you usually eat</span><input id="fCuisine" placeholder="e.g. North Indian home food"></label>
+            <label class="field" style="grid-column:1/-1"><span>Allergies or foods you avoid (optional)</span><input id="fAvoid" placeholder="e.g. peanuts, lactose"></label>
+          </div>
+          <p class="small muted" style="margin:0">Your usual food helps Claude judge portions and cooking oil in photos more accurately.</p>
+        </div>
+        <button id="saveProfile" class="primary">Save profile</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<nav class="bottom" aria-label="Sections">
+  <div class="row">
+    <a href="#today"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg>Today</a>
+    <a href="#food"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M7 3v8a2 2 0 0 0 2 2v8M11 3v8M7 7h4M17 3c-2 2-2 6 0 8v10"/></svg>Food</a>
+    <a href="#move"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 13h4l3-8 4 14 3-6h4"/></svg>Move</a>
+    <a href="#plan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 9v6M18 9v6M3 11v2M21 11v2M6 12h12"/></svg>Plan</a>
+    <a href="#profile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg>Profile</a>
+  </div>
+</nav>
+
+<script>
+(() => {
+'use strict';
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt = n => Math.round(+n || 0).toLocaleString();
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+
+/* ---------- dates ---------- */
+const keyOf = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const parseKey = k => { const [y,m,d] = k.split('-').map(Number); return new Date(y, m-1, d); };
+const shift = (k, n) => { const d = parseKey(k); d.setDate(d.getDate()+n); return keyOf(d); };
+const todayKey = () => keyOf(new Date());
+const labelOf = k => k === todayKey() ? 'Today' : k === shift(todayKey(), -1) ? 'Yesterday'
+  : parseKey(k).toLocaleDateString(undefined, {weekday:'short', day:'numeric', month:'short'});
+
+/* ---------- state ---------- */
+const S = { date: todayKey(), tab: 'today', loaded: false, mode: 'loading', slow: false };
+let docs = {};             // id -> body ("profile", "d-YYYY-MM-DD")
+let dbNs = null, colPath = null, sample = null, dict = null, aiImages = false, aiBlocked = false;
+
+/* ---------- storage ---------- */
+const LS = 'fuel-stride-v1';
+const lsAll = () => { try { return JSON.parse(localStorage.getItem(LS)) || {}; } catch { return {}; } };
+const lsPut = (id, body) => { try { const a = lsAll(); a[id] = body; localStorage.setItem(LS, JSON.stringify(a)); } catch {} };
+
+const pending = {}, running = {};
+function save(id, body) {
+  docs[id] = body; pending[id] = body; render(); flush(id);
+}
+async function flush(id) {
+  if (running[id]) return; running[id] = true;
+  while (pending[id]) {
+    const body = pending[id]; delete pending[id];
+    try {
+      if (dbNs) await dbNs.collection(colPath).doc(id).set(body);
+      else lsPut(id, body);
+    } catch (e) {
+      if (e?.code === 'unavailable') { pending[id] = pending[id] || body; await new Promise(r => setTimeout(r, 800 + Math.random()*800)); continue; }
+      toast(e?.code === 'quota_exceeded' ? 'Storage is full. Delete old entries to save new ones.' : 'Could not save that change. Check your connection.');
+    }
+  }
+  running[id] = false;
+}
+
+function useLocal(reason) {
+  S.mode = 'local'; docs = lsAll(); S.loaded = true;
+  const n = $('#storageNote');
+  n.textContent = reason || 'Saving on this device only. Open this page on claude.ai while signed in to sync between your phone and laptop.';
+  n.hidden = false;
+  fillProfileForm(); render();
+}
+
+function subscribe() {
+  S.mode = 'cloud';
+  const t = setTimeout(() => { S.slow = true; render(); }, 10000);
+  dbNs.collection(colPath).onSnapshot(snap => {
+    const next = {};
+    snap.docs.forEach(d => { next[d.id] = d.data(); });
+    Object.keys(pending).forEach(id => { next[id] = pending[id]; });
+    const firstLoad = !S.loaded;
+    docs = next; S.loaded = true;
+    if (!snap.metadata.fromCache) { clearTimeout(t); S.slow = false; }
+    if (firstLoad) fillProfileForm();
+    render();
+  }, err => {
+    clearTimeout(t);
+    useLocal('Your synced log could not be reached, so changes are saving on this device only for now.');
+  });
+}
+
+/* ---------- domain ---------- */
+const blankDay = k => ({ date: k, meals: [], steps: 0, workouts: [], plan: null });
+const dayId = k => 'd-' + k;
+const getDay = (k = S.date) => docs[dayId(k)] || blankDay(k);
+function editDay(fn) { const d = structuredClone(getDay()); fn(d); save(dayId(S.date), d); }
+const profile = () => docs.profile || null;
+const weight = () => +(profile()?.weightKg) || 70;
+
+function targets() {
+  const p = profile();
+  const stepGoal = +(p?.stepGoal) || 8000;
+  if (!p || !p.weightKg || !p.heightCm || !p.age) return { kcal: 2000, protein: 110, carbs: 225, fat: 67, steps: stepGoal, setup: false };
+  const w = +p.weightKg, h = +p.heightCm, a = +p.age, pace = +p.pace || 0.5;
+  const bmr = 10*w + 6.25*h - 5*a + (p.sex === 'male' ? 5 : p.sex === 'female' ? -161 : -78);
+  const base = bmr * (+p.activity || 1.3);
+  // 1 kg of body fat ≈ 7,700 kcal, so 0.5 kg/week ≈ 550 kcal/day
+  const adj = p.goal === 'lose' ? -Math.round(pace * 1100) : p.goal === 'recomp' ? -250
+    : p.goal === 'gain' ? Math.round(pace * 600) : 0;
+  const floor = p.sex === 'female' ? 1200 : 1500;
+  const kcal = Math.max(floor, Math.round((base + adj) / 10) * 10);
+  const perKg = p.goal === 'maintain' ? 1.4 : p.goal === 'recomp' ? 2.0 : 1.8;
+  const protein = Math.round(w * perKg);
+  const fat = Math.round(kcal * 0.28 / 9);
+  const carbs = Math.max(0, Math.round((kcal - protein*4 - fat*9) / 4));
+  return { kcal, protein, carbs, fat, steps: stepGoal, bmr: Math.round(bmr), tdee: Math.round(base), adj: kcal - Math.round(base), perKg, setup: true };
+}
+function totals(day) {
+  const t = { kcal: 0, p: 0, c: 0, f: 0 };
+  day.meals.forEach(m => { t.kcal += +m.kcal || 0; t.p += +m.p || 0; t.c += +m.c || 0; t.f += +m.f || 0; });
+  return t;
+}
+function burned(day) {
+  const wk = day.workouts.reduce((s, x) => s + (+x.kcal || 0), 0);
+  const st = Math.max(0, (+day.steps || 0) - 2000) * 0.0005 * weight();
+  return { workouts: Math.round(wk), steps: Math.round(st), total: Math.round(wk + st) };
+}
+const MET = { walk: 3.5, run: 9.8, cycle: 7.5, strength: 5, push: 5, pull: 5, legs: 6, hiit: 8, swim: 7, yoga: 2.5, sport: 7 };
+const TYPE_LABEL = { walk: 'Walking', run: 'Running', cycle: 'Cycling', strength: 'Strength', push: 'Push day', pull: 'Pull day', legs: 'Leg day', hiit: 'HIIT', swim: 'Swimming', yoga: 'Mobility', sport: 'Sports', plan: 'Planned session', other: 'Workout' };
+
+/* ---------- training split ---------- */
+const SPLITS = {
+  ppl: { name: 'Push / Pull / Legs', days: ['push', 'pull', 'legs'] },
+  ul:  { name: 'Upper / Lower', days: ['upper', 'lower'] },
+  fb:  { name: 'Full body', days: ['full'] },
+  auto:{ name: 'Let Claude decide', days: [] }
+};
+const DAY_LABEL = { push: 'Push', pull: 'Pull', legs: 'Legs', upper: 'Upper body', lower: 'Lower body', full: 'Full body', cardio: 'Cardio', core: 'Core', mobility: 'Mobility', rest: 'Rest' };
+const DAY_MUSCLES = {
+  push: 'chest, shoulders (front and side delts) and triceps — presses, dips, flyes, lateral raises, triceps extensions',
+  pull: 'back (lats, upper back), rear delts and biceps — pull-ups/pulldowns, rows, face pulls, curls',
+  legs: 'quads, hamstrings, glutes and calves — squats, hinges (RDL/deadlift), lunges, leg curls, calf raises',
+  upper: 'all upper-body muscles', lower: 'all lower-body muscles', full: 'the whole body',
+  cardio: 'heart and lungs — conditioning work', core: 'abs, obliques and lower back', mobility: 'joint mobility and recovery'
+};
+// Most recent training day type before a date, read from plans and logged workouts
+function recentSplitDays(beforeKey, n = 14) {
+  const out = [];
+  for (let i = 0; i <= n; i++) {
+    const k = shift(beforeKey, -i), d = docs[dayId(k)]; if (!d) continue;
+    const ws = (d.workouts || []).slice().reverse();
+    const tag = ws.map(w => w.splitDay || (['push', 'pull', 'legs'].includes(w.type) ? w.type : null)).find(Boolean)
+      || (d.plan && (d.plan.logged || Object.values(d.plan.done || {}).some(Boolean)) ? d.plan.splitDay : null);
+    if (tag && (i > 0 || ws.length)) out.push({ k, day: tag });
+  }
+  return out;
+}
+function nextSplitDay() {
+  const sp = SPLITS[profile()?.split || 'ppl'] || SPLITS.ppl;
+  if (!sp.days.length) return null;
+  const today = getDay(S.date);
+  // If today's session is already done, show what today was; otherwise the next one in the rotation
+  const last = recentSplitDays(shift(S.date, -1)).find(x => sp.days.includes(x.day));
+  if (!last) return sp.days[0];
+  return sp.days[(sp.days.indexOf(last.day) + 1) % sp.days.length];
+}
+const MEALS = ['breakfast', 'lunch', 'snack', 'dinner'];
+const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+
+/* ---------- AI ---------- */
+function aiErr(e) {
+  const c = e?.code;
+  if (c === 'not_granted' || c === 'sampling_disabled' || c === 'not_declared' || c === 'capability_disabled') { aiBlocked = true; applyAiAvailability(); return 'Claude access is off for this page, so AI estimates are unavailable on this visit. You can still log things by hand.'; }
+  if (c === 'rate_limited') return 'Claude is busy for your account right now. Wait a minute, then try again.';
+  if (c === 'invalid_json') return 'Claude replied in an unexpected format. Try again.';
+  if (c === 'image_rejected') return 'That photo could not be read. Try a JPEG or PNG under 20 MB.';
+  if (c === 'images_unavailable') return 'Photos can\'t be sent to Claude from this view. Use Describe instead.';
+  if (c === 'refused') return 'Claude could not estimate this. Try describing it differently.';
+  if (c === 'session_expired') return 'Your Claude sign-in expired. Sign in again, then retry.';
+  if (c === 'cancelled') return '';
+  return 'Something went wrong reaching Claude. Try again.';
+}
+const thinking = msg => `<div class="thinking"><span class="dot"></span>${esc(msg)}</div>`;
+const errBox = msg => msg ? `<div class="notice err">${esc(msg)}</div>` : '';
+
+const FOOD_FORMAT = `Reply with only JSON in exactly this shape:
+{"items":[{"name":"Chicken biryani","portion":"1 plate (~350 g)","kcal":520,"protein_g":24,"carbs_g":62,"fat_g":18}],"note":"One short sentence on your main assumptions."}
+Rules: one entry per distinct food or drink; realistic typical portions when size is unclear; account for cooking oil, butter, sauces and sugar in drinks; whole numbers only. If there is no food, return {"items":[],"note":"<why>"}.`;
+
+function foodContext() {
+  const p = profile() || {};
+  const bits = [];
+  if (p.cuisine) bits.push(`They usually eat ${p.cuisine}; assume that style of cooking and portion when unclear.`);
+  if (p.diet && p.diet !== 'none') bits.push(`They are ${p.diet}.`);
+  return bits.length ? '\n' + bits.join(' ') : '';
+}
+function cleanItems(arr) {
+  return (Array.isArray(arr) ? arr : []).map(x => ({
+    id: uid(), name: String(x.name || 'Food').slice(0, 80), portion: String(x.portion || '').slice(0, 60),
+    kcal: Math.max(0, Math.round(+x.kcal || 0)), p: Math.max(0, Math.round(+x.protein_g || 0)),
+    c: Math.max(0, Math.round(+x.carbs_g || 0)), f: Math.max(0, Math.round(+x.fat_g || 0))
+  })).filter(x => x.name);
+}
+
+let foodDraft = null, foodSrc = 'text';
+async function analyzeFood(kind) {
+  if (!sample) return;
+  const status = $('#foodStatus'); $('#foodReview').hidden = true;
+  let prompt, opts = { modelTier: 'default' };
+  if (kind === 'photo') {
+    if (!photoFile) return;
+    const note = $('#photoNote').value.trim();
+    prompt = `You are a careful nutrition estimator. The attached photo shows a meal. Identify every food and drink visible, estimate each portion from visual cues (plate size, utensils, hands), and estimate calories and macros.${foodContext()}${note ? `\nThe person added this note: "${note}". Trust it over what the photo suggests.` : ''}\n\n${FOOD_FORMAT}`;
+    opts.images = [photoFile];
+  } else {
+    const text = $('#foodText').value.trim();
+    if (!text) { status.innerHTML = errBox('Write what you ate first.'); return; }
+    prompt = `You are a careful nutrition estimator. A person describes what they ate, possibly by speaking, so the text may be informal, have filler words, or correct itself ("two rotis, no actually three"). Use their final intent:\n"""${text.slice(0, 2000)}"""\nSplit it into individual foods and drinks and estimate calories and macros for the amounts stated (typical servings if no amount is given).${foodContext()}\n\n${FOOD_FORMAT}`;
+  }
+  foodSrc = kind;
+  setBusy(['#analyzePhoto', '#analyzeText'], true);
+  status.innerHTML = thinking(kind === 'photo' ? 'Looking at your photo…' : 'Estimating…');
+  try {
+    const res = await sample.json(prompt, opts);
+    const items = cleanItems(res?.items);
+    status.innerHTML = '';
+    if (!items.length) { status.innerHTML = errBox(res?.note || 'No food was found. Try another photo or describe it.'); return; }
+    foodDraft = { items, note: String(res?.note || '') };
+    renderFoodReview();
+  } catch (e) { status.innerHTML = errBox(aiErr(e)); }
+  finally { setBusy(['#analyzePhoto', '#analyzeText'], false); if (!photoFile) $('#analyzePhoto').disabled = true; }
+}
+function renderFoodReview() {
+  const box = $('#foodReview');
+  if (!foodDraft) { box.hidden = true; return; }
+  const total = foodDraft.items.reduce((s, x) => s + (+x.kcal || 0), 0);
+  box.innerHTML = `<div class="review">
+    <div class="card-head"><h3>Check and adjust</h3><span class="num" style="font-weight:600">${fmt(total)} kcal</span></div>
+    ${foodDraft.note ? `<p class="small muted" style="margin:0">${esc(foodDraft.note)}</p>` : ''}
+    ${foodDraft.items.map((x, i) => `<div class="review-row">
+        <input data-i="${i}" data-k="name" value="${esc(x.name)}" aria-label="Food name">
+        <input data-i="${i}" data-k="kcal" type="number" inputmode="numeric" value="${x.kcal}" aria-label="Calories for ${esc(x.name)}">
+        <button class="icon ghost" data-del="${i}" aria-label="Remove ${esc(x.name)}" style="width:34px;height:34px">&times;</button>
+        <div class="macros">${esc(x.portion)}${x.portion ? ' · ' : ''}P ${x.p} g · C ${x.c} g · F ${x.f} g</div>
+      </div>`).join('')}
+    <div class="row"><button class="primary grow" id="confirmFood">Add to ${esc(cap($('#mealType').value))}</button><button class="ghost" id="discardFood">Discard</button></div>
+  </div>`;
+  box.hidden = false;
+  box.querySelectorAll('input[data-i]').forEach(inp => inp.addEventListener('input', () => {
+    const it = foodDraft.items[+inp.dataset.i];
+    if (inp.dataset.k === 'kcal') {
+      const old = it.kcal || 1, nv = Math.max(0, Math.round(+inp.value || 0));
+      const r = nv / old; if (old > 0 && nv > 0) { it.p = Math.round(it.p*r); it.c = Math.round(it.c*r); it.f = Math.round(it.f*r); }
+      it.kcal = nv;
+    } else it.name = inp.value;
+  }));
+  box.querySelectorAll('input[data-k="kcal"]').forEach(inp => inp.addEventListener('change', renderFoodReview));
+  box.querySelectorAll('[data-del]').forEach(b => b.onclick = () => { foodDraft.items.splice(+b.dataset.del, 1); if (!foodDraft.items.length) foodDraft = null; renderFoodReview(); });
+  $('#confirmFood').onclick = () => {
+    const meal = $('#mealType').value, at = new Date().toISOString();
+    editDay(d => { foodDraft.items.forEach(x => d.meals.push({ ...x, id: uid(), meal, src: foodSrc, at })); });
+    toast(`Added ${foodDraft.items.length} item${foodDraft.items.length > 1 ? 's' : ''} to ${cap(meal)}`);
+    foodDraft = null; renderFoodReview(); $('#foodText').value = ''; clearPhoto();
+  };
+  $('#discardFood').onclick = () => { foodDraft = null; renderFoodReview(); };
+}
+
+let woDraft = null;
+async function analyzeWorkout() {
+  if (!sample) return;
+  const text = $('#woText').value.trim(), status = $('#woStatus');
+  if (!text) { status.innerHTML = errBox('Describe your workout first.'); return; }
+  setBusy(['#woAI'], true); status.innerHTML = thinking('Estimating calories burned…');
+  try {
+    const res = await sample.json(`You estimate exercise energy expenditure using MET values. The person weighs ${weight()} kg${profile()?.age ? `, is ${profile().age} years old` : ''}.
+They describe their workout, possibly by speaking, so the text may be informal or correct itself; use their final intent:\n"""${text.slice(0, 2000)}"""
+Group it into sessions (e.g. a run and a strength circuit are two). Estimate active minutes and net calories burned for each (exclude resting metabolism). Write "detail" as a tidy summary of what they did (exercises, sets × reps, distance). Reply with only JSON:
+{"items":[{"name":"Push day","type":"push","minutes":50,"kcal":240,"detail":"Bench 4×8, OHP 3×10, dips 3×12, lateral raises 3×15"}]}
+"type" is one of push (chest/shoulders/triceps), pull (back/biceps), legs, strength (other or mixed lifting), walk, run, cycle, hiit, swim, yoga, sport, other. Whole numbers only.`, { modelTier: 'quick' });
+    const items = (Array.isArray(res?.items) ? res.items : []).map(x => ({
+      id: uid(), name: String(x.name || 'Workout').slice(0, 80), type: MET[x.type] ? x.type : 'other',
+      minutes: Math.max(0, Math.round(+x.minutes || 0)), kcal: Math.max(0, Math.round(+x.kcal || 0)), detail: String(x.detail || '').slice(0, 120)
+    }));
+    status.innerHTML = '';
+    if (!items.length) { status.innerHTML = errBox('No workout found in that description.'); return; }
+    woDraft = items; renderWoReview();
+  } catch (e) { status.innerHTML = errBox(aiErr(e)); }
+  finally { setBusy(['#woAI'], false); }
+}
+function renderWoReview() {
+  const box = $('#woReview');
+  if (!woDraft) { box.hidden = true; return; }
+  box.innerHTML = `<div class="review"><h3>Check and adjust</h3>
+    ${woDraft.map((x, i) => `<div class="review-row">
+      <input data-i="${i}" data-k="name" value="${esc(x.name)}" aria-label="Workout name">
+      <input data-i="${i}" data-k="kcal" type="number" inputmode="numeric" value="${x.kcal}" aria-label="Calories burned">
+      <button class="icon ghost" data-del="${i}" aria-label="Remove" style="width:34px;height:34px">&times;</button>
+      <div class="macros">${esc(TYPE_LABEL[x.type])} · ${x.minutes} min${x.detail ? ' · ' + esc(x.detail) : ''}</div></div>`).join('')}
+    <div class="row"><button class="primary grow" id="confirmWo">Add workout</button><button class="ghost" id="discardWo">Discard</button></div></div>`;
+  box.hidden = false;
+  box.querySelectorAll('input[data-i]').forEach(inp => inp.addEventListener('input', () => {
+    const it = woDraft[+inp.dataset.i]; if (inp.dataset.k === 'kcal') it.kcal = Math.max(0, Math.round(+inp.value || 0)); else it.name = inp.value;
+  }));
+  box.querySelectorAll('[data-del]').forEach(b => b.onclick = () => { woDraft.splice(+b.dataset.del, 1); if (!woDraft.length) woDraft = null; renderWoReview(); });
+  $('#confirmWo').onclick = () => {
+    const at = new Date().toISOString();
+    editDay(d => woDraft.forEach(x => d.workouts.push({ ...x, id: uid(), at })));
+    toast('Workout logged'); woDraft = null; renderWoReview(); $('#woText').value = '';
+  };
+  $('#discardWo').onclick = () => { woDraft = null; renderWoReview(); };
+}
+
+async function buildPlan() {
+  if (!sample) return;
+  const status = $('#planStatus'), p = profile() || {}, t = targets(), day = getDay();
+  const hist = [];
+  for (let i = 1; i <= 7; i++) {
+    const k = shift(S.date, -i), d = docs[dayId(k)];
+    if (d && (d.workouts?.length || d.steps)) hist.push(`${k}: ${d.workouts.map(w => `${w.name} (${TYPE_LABEL[w.type] || w.type}, ${w.minutes} min)`).join('; ') || 'no workout'}; ${fmt(d.steps)} steps`);
+  }
+  const eaten = totals(day);
+  const focus = $('#pFocus').value, mins = $('#pTime').value, note = $('#pNote').value.trim();
+  const splitKey = p.split || 'ppl', sp = SPLITS[splitKey] || SPLITS.ppl;
+  const target = focus === 'auto' ? nextSplitDay() : focus;
+  const recent = recentSplitDays(shift(S.date, -1), 7).map(x => `${x.k}: ${DAY_LABEL[x.day] || x.day}`).join(', ');
+  const focusLine = target
+    ? `Today is a ${DAY_LABEL[target]} day${focus === 'auto' ? ` (next in their ${sp.name} rotation)` : ''}. Train ${DAY_MUSCLES[target] || target}. Keep other muscle groups out of the main block. If the last 7 days show they are clearly overtrained or sore, you may switch to recovery, and explain why.`
+    : 'Choose the best focus given recent training: avoid hitting the same muscles two days running, and schedule recovery if training has been heavy.';
+  const prompt = `You are an experienced strength coach. Write one workout for today.
+Person: ${p.age ? p.age + ' years old, ' : ''}${p.sex && p.sex !== 'other' ? p.sex + ', ' : ''}${weight()} kg${p.heightCm ? ', ' + p.heightCm + ' cm' : ''}. Goal: ${p.goal || 'maintain'}. Experience: ${p.experience || 'beginner'}. Equipment: ${p.equipment || 'bodyweight only'}.
+Training split: ${sp.name}, ${p.days || 4} days a week. Recent split days: ${recent || 'none logged'}.${p.injuries ? `\nInjuries or limits: ${p.injuries}. Avoid exercises that aggravate these and offer safe swaps.` : ''}
+Today so far: ${fmt(eaten.kcal)} of ${fmt(t.kcal)} kcal eaten, ${fmt(eaten.p)} g protein, ${fmt(day.steps)} steps (goal ${fmt(t.steps)}), ${day.workouts.length ? 'already did: ' + day.workouts.map(w => w.name).join(', ') : 'no workout yet'}.
+Last 7 days: ${hist.length ? '\n' + hist.join('\n') : 'nothing logged'}.
+Time available: ${mins} minutes. ${focusLine}${note ? `\nThe person says: "${note.slice(0, 300)}". Respect it.` : ''}
+For lifts, give sets × reps and a target effort (e.g. "RIR 2" = 2 reps left in the tank). Order compound lifts before isolation work.
+Reply with only JSON:
+{"title":"Push day: chest & shoulders","split_day":"push","focus":"Chest, shoulders, triceps","minutes":45,"intensity":"moderate","why":"1–2 sentences on why this fits today, referencing their recent days.","est_kcal":250,
+"blocks":[{"name":"Warm-up","exercises":[{"name":"Band pull-aparts","dose":"2 × 15","rest":"","tip":"Squeeze shoulder blades"}]},{"name":"Main","exercises":[{"name":"Barbell bench press","dose":"4 × 6–8, RIR 2","rest":"2 min","tip":"Feet planted, slight arch"}]},{"name":"Finisher","exercises":[...]},{"name":"Cool-down","exercises":[...]}]}
+"split_day" is one of push, pull, legs, upper, lower, full, cardio, core, mobility, rest. Fit the time limit. Use only the listed equipment. "intensity" is low, moderate or high.`;
+  setBusy(['#buildPlan'], true); status.innerHTML = thinking('Building your plan… this can take up to a minute.');
+  try {
+    const r = await sample.json(prompt, { modelTier: 'default', cache: false });
+    const blocks = (Array.isArray(r?.blocks) ? r.blocks : []).map(b => ({
+      name: String(b.name || 'Block').slice(0, 40),
+      exercises: (Array.isArray(b.exercises) ? b.exercises : []).slice(0, 12).map(x => ({ name: String(x.name || '').slice(0, 80), dose: String(x.dose || '').slice(0, 40), rest: String(x.rest || '').slice(0, 20), tip: String(x.tip || '').slice(0, 140) })).filter(x => x.name)
+    })).filter(b => b.exercises.length);
+    if (!blocks.length) throw { code: 'invalid_json' };
+    const plan = { title: String(r.title || 'Today\'s workout').slice(0, 80), focus: String(r.focus || '').slice(0, 60), minutes: Math.round(+r.minutes || +mins),
+      splitDay: DAY_LABEL[r.split_day] ? r.split_day : (target || null),
+      intensity: ['low', 'moderate', 'high'].includes(r.intensity) ? r.intensity : 'moderate', why: String(r.why || '').slice(0, 400),
+      est_kcal: Math.max(0, Math.round(+r.est_kcal || 0)), blocks, done: {}, logged: false, made: new Date().toISOString() };
+    editDay(d => { d.plan = plan; });
+    status.innerHTML = '';
+  } catch (e) { status.innerHTML = errBox(aiErr(e)); }
+  finally { setBusy(['#buildPlan'], false); }
+}
+
+/* ---------- rendering ---------- */
+function ring(frac, color, size = 150, stroke = 13) {
+  const r = (size - stroke) / 2, c = 2 * Math.PI * r, f = Math.max(0, Math.min(1, frac));
+  return `<svg viewBox="0 0 ${size} ${size}" aria-hidden="true">
+    <circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="var(--surface-2)" stroke-width="${stroke}"/>
+    <circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="${color}" stroke-width="${stroke}" stroke-linecap="round" stroke-dasharray="${(c*f).toFixed(1)} ${c.toFixed(1)}"/></svg>`;
+}
+const macroBar = (label, v, goal, color) => `<div class="macro"><div class="top"><span>${label}</span><span class="num">${fmt(v)} / ${fmt(goal)} g</span></div>
+  <div class="bar"><i style="width:${Math.min(100, goal ? v/goal*100 : 0)}%;background:${color}"></i></div></div>`;
+
+function renderToday() {
+  const day = getDay(), t = targets(), e = totals(day), b = burned(day);
+  const budget = t.kcal + b.total, left = budget - e.kcal, over = left < 0;
+  $('#todayHero').innerHTML = `
+    <div class="card-head"><h2>Calories</h2>${t.setup ? `<span class="chip accent">${esc(cap(profile().goal || 'maintain'))} · ${fmt(t.kcal)} kcal</span>` : `<a href="#profile" class="chip gold" style="text-decoration:none">Set up profile for a personal target</a>`}</div>
+    <div class="hero">
+      <div class="ring">${ring(budget ? e.kcal / budget : 0, over ? 'var(--bad)' : 'var(--ember)')}
+        <div class="center"><span class="big">${fmt(Math.abs(left))}</span><span class="small muted">${over ? 'kcal over' : 'kcal left'}</span></div></div>
+      <div class="stats">
+        <div class="stat"><div class="label">Target</div><div class="v">${fmt(t.kcal)}</div></div>
+        <div class="stat"><div class="label">Eaten</div><div class="v" style="color:var(--ember)">${fmt(e.kcal)}</div></div>
+        <div class="stat"><div class="label">Workouts</div><div class="v" style="color:var(--accent)">+${fmt(b.workouts)}</div></div>
+        <div class="stat"><div class="label">Steps bonus</div><div class="v" style="color:var(--sky)">+${fmt(b.steps)}</div></div>
+      </div>
+    </div>
+    <div class="equation num">${fmt(t.kcal)} target + ${fmt(b.total)} burned − ${fmt(e.kcal)} eaten = ${over ? '−' : ''}${fmt(Math.abs(left))} kcal</div>
+    ${macroBar('Protein', e.p, t.protein, 'var(--accent)')}
+    ${macroBar('Carbs', e.c, t.carbs, 'var(--gold)')}
+    ${macroBar('Fat', e.f, t.fat, 'var(--ember)')}`;
+
+  const sf = t.steps ? day.steps / t.steps : 0;
+  $('#todaySteps').innerHTML = `<div class="card-head"><h2>Steps</h2><a href="#move" class="small" style="color:var(--accent);font-weight:600">Update</a></div>
+    <div class="row" style="gap:16px;flex-wrap:nowrap">
+      <div class="ring" style="width:84px;height:84px;flex:none">${ring(sf, 'var(--sky)', 84, 10)}<div class="center"><span class="num small" style="font-weight:600">${Math.round(sf*100)}%</span></div></div>
+      <div><div class="steps-big">${fmt(day.steps)}</div><div class="small muted">of ${fmt(t.steps)} goal · about ${(day.steps * 0.00076).toFixed(1)} km</div></div>
+    </div>`;
+
+  const pl = day.plan;
+  if (pl) {
+    const all = pl.blocks.flatMap((bk, bi) => bk.exercises.map((_, ei) => `${bi}-${ei}`));
+    const done = all.filter(k => pl.done?.[k]).length;
+    $('#todayPlan').innerHTML = `<div class="card-head"><h2>Workout plan</h2><span class="chip ${pl.logged ? 'accent' : 'gold'}">${pl.logged ? 'Done' : `${done}/${all.length} exercises`}</span></div>
+      <div><div style="font-weight:600">${esc(pl.title)}</div><div class="small muted">${pl.minutes} min · ${esc(pl.intensity)} · ~${fmt(pl.est_kcal)} kcal</div></div>
+      <div class="bar"><i style="width:${all.length ? done/all.length*100 : 0}%;background:var(--accent)"></i></div>
+      <a href="#plan" class="btn" style="text-decoration:none">Open plan</a>`;
+  } else {
+    $('#todayPlan').innerHTML = `<div class="card-head"><h2>Workout plan</h2></div>
+      ${nextSplitDay() ? `<div><span class="chip gold">Next up: ${esc(DAY_LABEL[nextSplitDay()])} day</span></div>` : ''}
+      <p class="muted" style="margin:0">No plan for ${S.date === todayKey() ? 'today' : 'this day'} yet. Claude can build one around your split, recent training and time available.</p>
+      <a href="#plan" class="btn primary" style="text-decoration:none;background:var(--accent);color:var(--accent-ink);border-color:var(--accent)">Suggest a workout</a>`;
+  }
+  $('#todayMeals').innerHTML = `<div class="card-head"><h2>Meals</h2><a href="#food" class="small" style="color:var(--accent);font-weight:600">Log food</a></div>` +
+    (day.meals.length ? MEALS.map(m => { const xs = day.meals.filter(x => x.meal === m); if (!xs.length) return '';
+      return `<div class="item" style="grid-template-columns:1fr auto"><div><div class="name">${cap(m)}</div><div class="sub">${esc(xs.map(x => x.name).join(', '))}</div></div><div class="k">${fmt(xs.reduce((s, x) => s + (+x.kcal || 0), 0))}</div></div>`; }).join('')
+      : `<div class="empty">Nothing logged yet. Snap a photo of your next meal or describe it.</div>`);
+  renderTrend();
+}
+
+function renderTrend() {
+  const t = targets(), keys = Array.from({ length: 7 }, (_, i) => shift(S.date, i - 6));
+  const rows = keys.map(k => { const d = docs[dayId(k)] || blankDay(k); return { k, kcal: totals(d).kcal, steps: +d.steps || 0 }; });
+  const W = 320, H = 120, pad = 22, bw = (W - pad) / 7;
+  const maxK = Math.max(t.kcal * 1.25, ...rows.map(r => r.kcal), 1), maxS = Math.max(t.steps * 1.25, ...rows.map(r => r.steps), 1);
+  const yK = v => H - 16 - (v / maxK) * (H - 30), yS = v => H - 16 - (v / maxS) * (H - 30);
+  const bars = (yf, key, color, tgt, maxV) => `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${key === 'kcal' ? 'Calories eaten' : 'Steps'}, last 7 days">
+    <line x1="${pad}" x2="${W}" y1="${yf(tgt)}" y2="${yf(tgt)}" stroke="var(--muted)" stroke-dasharray="3 3" stroke-width="1"/>
+    <text x="0" y="${yf(tgt) + 3}">${tgt >= 1000 ? Math.round(tgt / 100) / 10 + 'k' : tgt}</text>
+    ${rows.map((r, i) => { const x = pad + i * bw + bw * 0.18, w = bw * 0.64, y = yf(r[key]); const sel = r.k === S.date;
+      return `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${w.toFixed(1)}" height="${Math.max(0, H - 16 - y).toFixed(1)}" rx="3" fill="${color}" opacity="${sel ? 1 : 0.55}"/>
+      <text x="${(x + w / 2).toFixed(1)}" y="${H - 3}" text-anchor="middle">${parseKey(r.k).toLocaleDateString(undefined, { weekday: 'narrow' })}</text>`; }).join('')}
+  </svg>`;
+  const avg = Math.round(rows.reduce((s, r) => s + r.kcal, 0) / 7), avgS = Math.round(rows.reduce((s, r) => s + r.steps, 0) / 7);
+  $('#trend').innerHTML = `<div class="card-head"><h2>Last 7 days</h2><span class="small muted">dashed line = target</span></div>
+    <div><div class="row" style="justify-content:space-between"><span class="label">Calories eaten</span><span class="small num muted">avg ${fmt(avg)}</span></div>${bars(yK, 'kcal', 'var(--ember)', t.kcal)}</div>
+    <div><div class="row" style="justify-content:space-between"><span class="label">Steps</span><span class="small num muted">avg ${fmt(avgS)}</span></div>${bars(yS, 'steps', 'var(--sky)', t.steps)}</div>`;
+}
+
+function renderFood() {
+  const day = getDay(), e = totals(day);
+  $('#mealList').innerHTML = `<div class="card-head"><h2>${esc(labelOf(S.date))}'s food</h2><span class="num" style="font-weight:600">${fmt(e.kcal)} kcal</span></div>` +
+    (day.meals.length ? `<div class="list">${MEALS.map(m => { const xs = day.meals.filter(x => x.meal === m); if (!xs.length) return '';
+      return `<div class="group-title"><span class="label">${cap(m)}</span><span class="small num muted">${fmt(xs.reduce((s, x) => s + (+x.kcal || 0), 0))} kcal</span></div>` +
+        xs.map(x => `<div class="item"><div><div class="name">${esc(x.name)}</div><div class="sub">${x.portion ? esc(x.portion) + ' · ' : ''}P ${fmt(x.p)} · C ${fmt(x.c)} · F ${fmt(x.f)}${x.src === 'photo' ? ' · from photo' : ''}</div></div>
+          <div class="k">${fmt(x.kcal)}</div><button data-delmeal="${esc(x.id)}" aria-label="Delete ${esc(x.name)}">&times;</button></div>`).join(''); }).join('')}</div>`
+      : `<div class="empty">No food logged for this day.</div>`);
+  $$('[data-delmeal]').forEach(b => b.onclick = () => editDay(d => { d.meals = d.meals.filter(x => x.id !== b.dataset.delmeal); }));
+}
+
+function renderMove() {
+  const day = getDay(), t = targets(), b = burned(day);
+  $('#stepsGoalChip').textContent = `Goal ${fmt(t.steps)}`;
+  $('#stepsView').innerHTML = `<div class="row" style="justify-content:space-between;align-items:end">
+    <div><div class="steps-big">${fmt(day.steps)}</div><div class="small muted">≈ ${(day.steps * 0.00076).toFixed(1)} km · +${fmt(b.steps)} kcal above a 2,000-step baseline</div></div></div>
+    <div class="bar"><i style="width:${Math.min(100, t.steps ? day.steps / t.steps * 100 : 0)}%;background:var(--sky)"></i></div>`;
+  $('#woList').innerHTML = `<div class="card-head"><h2>Workouts</h2><span class="num" style="font-weight:600">${fmt(b.workouts)} kcal</span></div>` +
+    (day.workouts.length ? `<div class="list">${day.workouts.map(w => `<div class="item"><div><div class="name">${esc(w.name)}</div>
+      <div class="sub">${esc(TYPE_LABEL[w.type] || 'Workout')} · ${fmt(w.minutes)} min${w.detail ? ' · ' + esc(w.detail) : ''}</div></div>
+      <div class="k">${fmt(w.kcal)}</div><button data-delwo="${esc(w.id)}" aria-label="Delete ${esc(w.name)}">&times;</button></div>`).join('')}</div>`
+      : `<div class="empty">No workouts logged for this day.</div>`);
+  $$('[data-delwo]').forEach(btn => btn.onclick = () => editDay(d => {
+    d.workouts = d.workouts.filter(x => x.id !== btn.dataset.delwo);
+    if (d.plan && btn.dataset.delwo === 'plan-' + d.date) d.plan.logged = false;
+  }));
+}
+
+function renderPlan() {
+  const pl = getDay().plan, box = $('#planView');
+  $('#buildPlan').textContent = pl ? 'Build a new plan' : 'Build today\'s plan';
+  const sp = SPLITS[profile()?.split || 'ppl'] || SPLITS.ppl, nx = nextSplitDay();
+  const hist = recentSplitDays(shift(S.date, -1), 7).slice(0, 4).map(x => `${DAY_LABEL[x.day] || x.day} (${esc(labelOf(x.k))})`).join(' → ');
+  $('#splitInfo').innerHTML = sp.days.length ? `<div class="row" style="gap:6px">
+      <span class="chip accent">${esc(sp.name)}</span>${nx ? `<span class="chip gold">Next up: ${esc(DAY_LABEL[nx])}</span>` : ''}
+    </div>${hist ? `<p class="small muted" style="margin:6px 0 0">Recent: ${hist}</p>` : ''}` : '';
+  if (!pl) { box.innerHTML = `<h2>Your plan</h2><div class="empty">No plan yet. Pick your time and focus, then build one.</div>`; return; }
+  box.innerHTML = `<div class="card-head"><h2>${esc(pl.title)}</h2><span class="chip ${pl.intensity === 'high' ? 'ember' : pl.intensity === 'low' ? 'sky' : 'gold'}">${esc(pl.intensity)}</span></div>
+    <div class="row" style="gap:6px">${pl.splitDay ? `<span class="chip accent">${esc(DAY_LABEL[pl.splitDay] || pl.splitDay)} day</span>` : ''}<span class="small muted">${pl.minutes} min · ${esc(pl.focus)} · ~${fmt(pl.est_kcal)} kcal</span></div>
+    ${pl.why ? `<p style="margin:0">${esc(pl.why)}</p>` : ''}
+    ${pl.blocks.map((bk, bi) => `<div class="plan-block"><div class="label">${esc(bk.name)}</div>
+      ${bk.exercises.map((x, ei) => { const k = `${bi}-${ei}`, d = !!pl.done?.[k];
+        return `<label class="ex${d ? ' done' : ''}"><input type="checkbox" data-ex="${k}" ${d ? 'checked' : ''}>
+          <div><div class="ex-name">${esc(x.name)}</div><div class="ex-meta">${esc(x.dose)}${x.rest ? ' · rest ' + esc(x.rest) : ''}</div>${x.tip ? `<div class="ex-meta">${esc(x.tip)}</div>` : ''}</div></label>`; }).join('')}</div>`).join('')}
+    <button id="logPlan" class="primary" ${pl.logged ? 'disabled' : ''}>${pl.logged ? 'Logged as done' : `Finish and log ~${fmt(pl.est_kcal)} kcal`}</button>`;
+  box.querySelectorAll('[data-ex]').forEach(cb => cb.onchange = () => editDay(d => { d.plan.done = { ...(d.plan.done || {}), [cb.dataset.ex]: cb.checked }; }));
+  const lp = $('#logPlan');
+  if (lp && !pl.logged) lp.onclick = () => editDay(d => {
+    d.plan.logged = true;
+    d.workouts = d.workouts.filter(w => w.id !== 'plan-' + d.date);
+    d.workouts.push({ id: 'plan-' + d.date, name: d.plan.title, type: ['push', 'pull', 'legs'].includes(d.plan.splitDay) ? d.plan.splitDay : 'plan', splitDay: d.plan.splitDay || null, minutes: d.plan.minutes, kcal: d.plan.est_kcal, detail: d.plan.focus, at: new Date().toISOString() });
+    toast('Workout logged. Nice work.');
+  });
+}
+
+function renderTargets() {
+  const t = targets();
+  const p = profile() || {};
+  const GOAL_TXT = { lose: 'Lose fat', recomp: 'Lose fat, keep muscle', maintain: 'Maintain', gain: 'Build muscle' };
+  let body = '';
+  if (t.setup) {
+    const w = +p.weightKg, hM = +p.heightCm / 100, bmi = w / (hM * hM);
+    const bmiCat = bmi < 18.5 ? ['Underweight', 'sky'] : bmi < 25 ? ['Healthy range', 'accent'] : bmi < 30 ? ['Overweight', 'gold'] : ['Obese range', 'ember'];
+    const water = Math.round(w * 35 / 100) / 10;
+    const gw = +p.goalWeightKg, pace = +p.pace || 0.5;
+    let eta = '';
+    if (gw && Math.abs(gw - w) >= 0.5 && ((p.goal === 'lose' || p.goal === 'recomp') ? gw < w : p.goal === 'gain' ? gw > w : false)) {
+      const weeks = Math.ceil(Math.abs(w - gw) / (p.goal === 'recomp' ? 0.2 : pace));
+      const when = new Date(); when.setDate(when.getDate() + weeks * 7);
+      eta = `<div class="item" style="grid-template-columns:1fr auto"><div><div class="name">Reach ${fmt(gw)} kg</div><div class="sub">${Math.abs(w - gw).toFixed(1)} kg to go at ${p.goal === 'recomp' ? '~0.2' : pace} kg/week</div></div><div class="k">${when.toLocaleDateString(undefined, { month: 'short', year: 'numeric' })}</div></div>`;
+    }
+    const sp = SPLITS[p.split || 'ppl'] || SPLITS.ppl;
+    const adjTxt = t.adj < 0 ? `${fmt(-t.adj)} kcal below maintenance` : t.adj > 0 ? `${fmt(t.adj)} kcal above maintenance` : 'at maintenance';
+    body = `
+    <div class="stats">
+      <div class="stat"><div class="label">BMI</div><div class="v">${bmi.toFixed(1)}</div><span class="chip ${bmiCat[1]}">${bmiCat[0]}</span></div>
+      <div class="stat"><div class="label">Resting burn (BMR)</div><div class="v">${fmt(t.bmr)}</div><div class="small muted">kcal/day at complete rest</div></div>
+      <div class="stat"><div class="label">Maintenance</div><div class="v">${fmt(t.tdee)}</div><div class="small muted">kcal/day with your daily life</div></div>
+      <div class="stat"><div class="label">Daily target</div><div class="v" style="color:var(--ember)">${fmt(t.kcal)}</div><div class="small muted">${adjTxt}</div></div>
+    </div>
+    <div class="list">
+      <div class="item" style="grid-template-columns:1fr auto"><div><div class="name">Protein</div><div class="sub">${t.perKg} g per kg body weight, spread over 3–4 meals</div></div><div class="k">${fmt(t.protein)} g</div></div>
+      <div class="item" style="grid-template-columns:1fr auto"><div><div class="name">Carbs · Fat</div><div class="sub">Fat ≈ 28% of calories, carbs fill the rest</div></div><div class="k">${fmt(t.carbs)} · ${fmt(t.fat)} g</div></div>
+      <div class="item" style="grid-template-columns:1fr auto"><div><div class="name">Water</div><div class="sub">About 35 ml per kg, more on training days</div></div><div class="k">${water} L</div></div>
+      <div class="item" style="grid-template-columns:1fr auto"><div><div class="name">Steps</div><div class="sub">Steps above 2,000 add calories to your budget</div></div><div class="k">${fmt(t.steps)}</div></div>
+      ${eta}
+      <div class="item" style="grid-template-columns:1fr auto"><div><div class="name">Training</div><div class="sub">${esc(sp.name)} · ${esc(p.days || 4)} days/week · ${esc(p.sessionMin || 45)} min · ${esc(cap(p.experience || 'beginner'))}${p.equipment ? ' · ' + esc(p.equipment) : ''}</div></div><div class="k">${nextSplitDay() ? esc(DAY_LABEL[nextSplitDay()]) + ' next' : ''}</div></div>
+      ${p.injuries ? `<div class="item" style="grid-template-columns:1fr"><div><div class="name">Working around</div><div class="sub">${esc(p.injuries)}</div></div></div>` : ''}
+      ${(p.diet && p.diet !== 'none') || p.cuisine || p.avoid ? `<div class="item" style="grid-template-columns:1fr"><div><div class="name">Food</div><div class="sub">${[p.diet && p.diet !== 'none' ? cap(p.diet) : '', p.cuisine || '', p.avoid ? 'avoids ' + p.avoid : ''].filter(Boolean).map(esc).join(' · ')}</div></div></div>` : ''}
+    </div>
+    <p class="small muted" style="margin:0">Calories use the Mifflin–St Jeor formula: resting burn × your daily-life level, then adjusted for your goal and pace (1 kg of fat ≈ 7,700 kcal).</p>`;
+  } else {
+    body = `<div class="notice">Fill in age, height and weight below to get your own numbers. Until then the app uses 2,000 kcal and 8,000 steps.</div>`;
+  }
+  $('#targetsView').innerHTML = `<div class="card-head"><h2>${p.name ? esc(p.name) + '’s plan' : 'Your plan'}</h2>${t.setup ? `<span class="chip accent">${esc(GOAL_TXT[p.goal] || 'Maintain')}</span>` : ''}</div>
+    ${body}
+    <p class="small muted" style="margin:0">${S.mode === 'cloud' ? 'Your log is saved to your Claude account privately, so it is the same on your phone and laptop.' : 'Your log is saved in this browser only.'} AI estimates are approximate; treat them as a guide, not medical advice.</p>`;
+}
+
+function render() {
+  $('#dateLabel').textContent = labelOf(S.date);
+  $('#nextDay').disabled = S.date >= todayKey();
+  if (!S.loaded) {
+    ['#todayHero', '#todaySteps', '#todayPlan', '#todayMeals', '#trend', '#mealList', '#woList', '#planView', '#targetsView'].forEach(s => { $(s).innerHTML = thinking(S.slow ? 'Still trying to reach your saved log…' : 'Loading your log…'); });
+    $('#stepsView').innerHTML = '';
+    return;
+  }
+  renderToday(); renderFood(); renderMove(); renderPlan(); renderTargets();
+}
+
+/* ---------- tabs & date ---------- */
+const TABS = ['today', 'food', 'move', 'plan', 'profile'];
+function route() {
+  const h = location.hash.replace('#', '');
+  S.tab = TABS.includes(h) ? h : 'today';
+  TABS.forEach(t => { $('#v-' + t).hidden = t !== S.tab; });
+  $$('nav a').forEach(a => a.getAttribute('href') === '#' + S.tab ? a.setAttribute('aria-current', 'page') : a.removeAttribute('aria-current'));
+  window.scrollTo(0, 0);
+}
+window.addEventListener('hashchange', route);
+function setDate(k) { S.date = k; $('#stepsInput').value = ''; foodDraft = null; renderFoodReview(); woDraft = null; renderWoReview(); render(); }
+$('#prevDay').onclick = () => setDate(shift(S.date, -1));
+$('#nextDay').onclick = () => { if (S.date < todayKey()) setDate(shift(S.date, 1)); };
+
+/* ---------- food inputs ---------- */
+function setMode(m) {
+  $('#modePhoto').setAttribute('aria-pressed', m === 'photo'); $('#modeText').setAttribute('aria-pressed', m === 'text');
+  $('#photoPane').hidden = m !== 'photo'; $('#textPane').hidden = m !== 'text';
+}
+$('#modePhoto').onclick = () => setMode('photo');
+$('#modeText').onclick = () => setMode('text');
+let photoFile = null, photoURL = null;
+function clearPhoto() { photoFile = null; if (photoURL) URL.revokeObjectURL(photoURL); photoURL = null; $('#photoPreview').hidden = true; $('#analyzePhoto').disabled = true; $('#photoNote').value = ''; $('#camInput').value = ''; $('#fileInput').value = ''; }
+function pickPhoto(e) {
+  const f = e.target.files?.[0]; if (!f) return;
+  if (photoURL) URL.revokeObjectURL(photoURL);
+  photoFile = f; photoURL = URL.createObjectURL(f);
+  const img = $('#photoPreview'); img.src = photoURL; img.hidden = false;
+  $('#analyzePhoto').disabled = !sample || aiBlocked;
+  $('#foodStatus').innerHTML = '';
+}
+$('#camInput').onchange = pickPhoto; $('#fileInput').onchange = pickPhoto;
+$('#analyzePhoto').onclick = () => analyzeFood('photo');
+$('#analyzeText').onclick = () => analyzeFood('text');
+const h = new Date().getHours();
+$('#mealType').value = h < 11 ? 'breakfast' : h < 15 ? 'lunch' : h < 18 ? 'snack' : 'dinner';
+$('#addManualFood').onclick = () => {
+  const name = $('#mName').value.trim(), kcal = Math.round(+$('#mKcal').value || 0);
+  if (!name || !kcal) { toast('Enter a food name and its calories.'); return; }
+  editDay(d => d.meals.push({ id: uid(), meal: $('#mealType').value, name, portion: '', kcal, p: Math.round(+$('#mP').value || 0), c: 0, f: 0, src: 'manual', at: new Date().toISOString() }));
+  $('#mName').value = ''; $('#mKcal').value = ''; $('#mP').value = ''; toast('Food added');
+};
+
+/* ---------- move inputs ---------- */
+$('#saveSteps').onclick = () => {
+  const v = Math.round(+$('#stepsInput').value);
+  if (!(v >= 0) || $('#stepsInput').value === '') { toast('Enter your step count.'); return; }
+  editDay(d => { d.steps = v; }); $('#stepsInput').value = ''; toast('Steps saved');
+};
+$$('.addSteps').forEach(b => b.onclick = () => editDay(d => { d.steps = (+d.steps || 0) + +b.dataset.n; }));
+$('#woAI').onclick = analyzeWorkout;
+$('#addManualWo').onclick = () => {
+  const type = $('#wType').value, min = Math.round(+$('#wMin').value || 0);
+  if (!min) { toast('Enter how many minutes.'); return; }
+  const kcal = Math.round(MET[type] * +$('#wEffort').value * weight() * (min / 60) * 0.9);
+  editDay(d => d.workouts.push({ id: uid(), name: $('#wName').value.trim() || TYPE_LABEL[type], type, minutes: min, kcal, detail: '', at: new Date().toISOString() }));
+  $('#wMin').value = ''; $('#wName').value = ''; toast(`Logged ~${kcal} kcal`);
+};
+$('#buildPlan').onclick = buildPlan;
+
+/* ---------- profile ---------- */
+const PF = { fName: 'name', fSex: 'sex', fAge: 'age', fH: 'heightCm', fW: 'weightKg', fGoalW: 'goalWeightKg', fPace: 'pace', fAct: 'activity', fGoal: 'goal', fSteps: 'stepGoal',
+  fExp: 'experience', fSplit: 'split', fDays: 'days', fSess: 'sessionMin', fEquip: 'equipment', fInj: 'injuries', fDiet: 'diet', fCuisine: 'cuisine', fAvoid: 'avoid' };
+const PF_NUM = ['age', 'heightCm', 'weightKg', 'goalWeightKg', 'pace', 'activity', 'stepGoal', 'days', 'sessionMin'];
+function fillProfileForm() {
+  const p = profile() || {};
+  Object.entries(PF).forEach(([id, k]) => { const el = $('#' + id); if (el && p[k] != null && p[k] !== '') el.value = String(p[k]); });
+  if (!p.stepGoal) $('#fSteps').value = 8000;
+  if (p.sessionMin && [...$('#pTime').options].some(o => o.value == p.sessionMin)) $('#pTime').value = String(p.sessionMin);
+}
+$('#saveProfile').onclick = () => {
+  const p = {};
+  Object.entries(PF).forEach(([id, k]) => { const v = $('#' + id).value.trim(); p[k] = PF_NUM.includes(k) ? (v === '' ? null : +v) : v.slice(0, 120); });
+  save('profile', p); fillProfileForm(); toast('Profile saved'); window.scrollTo(0, 0);
+};
+
+/* ---------- helpers ---------- */
+function setBusy(sels, on) { sels.forEach(s => { const el = $(s); if (el) el.disabled = on || !sample || aiBlocked; }); }
+let toastT;
+function toast(msg) {
+  let el = $('.toast'); if (!el) { el = document.createElement('div'); el.className = 'toast'; el.setAttribute('role', 'status'); document.body.append(el); }
+  el.textContent = msg; el.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => { el.hidden = true; }, 2400);
+}
+function applyAiAvailability() {
+  const ok = !!sample && !aiBlocked;
+  $('#aiMissingFood').hidden = ok; $('#aiMissingPlan').hidden = ok;
+  ['#analyzeText', '#woAI', '#buildPlan'].forEach(s => { $(s).disabled = !ok; });
+  $('#analyzePhoto').disabled = !ok || !photoFile;
+  if (ok && !aiImages) { setMode('text'); $('#modePhoto').hidden = true; }
+}
+
+/* ---------- speech → description ---------- */
+// Speaking fills the description box live; when you stop, Claude turns it into an itemised estimate for review.
+let micTarget = null, micBtn = null, micBase = '', micStart = '';
+const MIC_KEYBOARD_HINT = 'To speak instead of typing, tap the microphone on your phone’s keyboard, then tap Estimate. Claude understands casual speech like “two rotis, no actually three”.';
+function setVoiceHints(text) { $$('.voiceHint').forEach(p => { p.textContent = text; p.hidden = !text; }); }
+function hideMics() { $('#foodMic').hidden = true; $('#woMic').hidden = true; setVoiceHints(MIC_KEYBOARD_HINT); }
+function setupDictation() {
+  if (!dict) { hideMics(); return; }
+  setVoiceHints('Tap Speak, say what you had, then tap Stop. Claude turns it into an itemised estimate.');
+  [['#foodMic', '#foodText'], ['#woMic', '#woText']].forEach(([b, ta]) => {
+    const btn = $(b); btn.hidden = false;
+    btn.onclick = () => {
+      if (dict.active()) { dict.stop(); return; }
+      micTarget = $(ta); micBtn = btn; micBase = micTarget.value.trim(); micStart = micBase;
+      dict.start().catch(e => {
+        if (e?.code === 'not_granted' || e?.code === 'unavailable') hideMics();
+        else if (e?.code === 'rate_limited') toast('Voice input is busy. Try again in a moment.');
+      });
+    };
+  });
+  dict.onPartial(({ text }) => { if (micTarget) micTarget.value = micBase + (text ? (micBase ? ' ' : '') + text : ''); });
+  dict.onFinal(({ text }) => { if (!micTarget) return; micBase = micBase ? micBase + (text.startsWith(' ') ? '' : ' ') + text : text.trimStart(); micTarget.value = micBase; });
+  dict.onState(({ state, reason }) => {
+    const on = state !== 'idle';
+    ['#foodMic', '#woMic'].forEach(s => {
+      const pressed = on && micBtn === $(s);
+      $(s).setAttribute('aria-pressed', String(pressed));
+      $(s).querySelector('.micLabel').textContent = pressed ? (state === 'finishing' ? 'Finishing…' : 'Stop') : 'Speak';
+    });
+    if (on) return;
+    if (reason === 'unavailable' || reason === 'not_granted') { hideMics(); return; }
+    // Finished speaking: run the estimate on what was said
+    if (micTarget && (reason === 'stopped' || reason === 'viewer_stopped') && micTarget.value.trim() && micTarget.value.trim() !== micStart) {
+      if (micTarget.id === 'foodText') analyzeFood('text');
+      else if (micTarget.id === 'woText') analyzeWorkout();
+    }
+    micTarget = null;
+  });
+}
+
+/* ---------- boot ---------- */
+route(); render(); applyAiAvailability();
+async function boot() {
+  if (!window.claude?.use) { useLocal(); setupDictation(); return; }
+  claude.use('sample').then(async s => {
+    sample = s;
+    if (s) { const lim = await s.limits().catch(() => null); aiImages = !!lim?.images; if (lim?.images?.mediaTypes) { $('#camInput').accept = $('#fileInput').accept = lim.images.mediaTypes.join(','); } }
+    applyAiAvailability();
+  });
+  claude.use('dictation').then(d => { dict = d; setupDictation(); });
+  const [db, user] = await Promise.all([claude.use('db'), claude.use('user')]);
+  const id = user ? await user.id() : null;
+  if (db && id) { dbNs = db; colPath = 'data/users/' + id; subscribe(); }
+  else useLocal();
+}
+boot();
+})();
+</script>
